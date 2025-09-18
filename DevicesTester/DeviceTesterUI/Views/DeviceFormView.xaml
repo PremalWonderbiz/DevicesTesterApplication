@@ -15,6 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Row 1: Agent & IP Address -->
@@ -29,47 +30,51 @@
             </ComboBox>
         </StackPanel>
 
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,10,0,0">
-            <Label Content="IP Address*" FontSize="11"/>
-            <TextBox x:Name="IPTextBox" Height="25" FontSize="11" Text="192.168.1.100" VerticalContentAlignment="Center"/>
-        </StackPanel>
 
         <!-- Row 2: Port & Username -->
         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,10,10,0">
+            <Label Content="IP Address*" FontSize="11"/>
+            <TextBox x:Name="IPTextBox" Height="25" FontSize="11" Text="192.168.1.100" VerticalContentAlignment="Center"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0">
             <Label Content="Port*" FontSize="11"/>
             <ComboBox x:Name="PortComboBox" Height="25" FontSize="11" 
               IsEditable="False" SelectionChanged="PortComboBox_SelectionChanged" VerticalContentAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0">
-            <Label Content="Username*" FontSize="11"/>
-            <TextBox x:Name="UsernameTextBox" Height="25" Text="account1" FontSize="11" VerticalContentAlignment="Center"/>
-        </StackPanel>
 
         <!-- Row 3: Password & DeviceId -->
         <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,10,10,0">
+            <Label Content="Username*" FontSize="11"/>
+            <TextBox x:Name="UsernameTextBox" Height="25" Text="account1" FontSize="11" VerticalContentAlignment="Center"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,10,0,0">
             <Label Content="Password*" FontSize="11"/>
             <PasswordBox x:Name="PasswordBox" Height="25" Password="pass@123" FontSize="11" VerticalContentAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,10,0,0">
-            <Label Content="DeviceId" FontSize="11"/>
-            <TextBox x:Name="DeviceIdTextBox" Height="25" FontSize="11" VerticalContentAlignment="Center"/>
-        </StackPanel>
 
         <!-- Row 4: SolutionId & Is Secured -->
         <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,10,10,0">
+            <Label Content="Use Secure Connection*" FontSize="11"/>
+            <CheckBox x:Name="SecureCheckBox" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Row 5: SolutionId & Is Secured -->
+        <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,10,10,0">
+            <Label Content="DeviceId" FontSize="11"/>
+            <TextBox x:Name="DeviceIdTextBox" Height="25" FontSize="11" VerticalContentAlignment="Center"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,10,0,0">
             <Label Content="SolutionId" FontSize="11"/>
             <TextBox x:Name="SolutionIdTextBox" Height="25" FontSize="11" VerticalContentAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,10,0,0">
-            <Label Content="Secure Connection*" FontSize="11"/>
-            <CheckBox x:Name="SecureCheckBox" IsChecked="True" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-        </StackPanel>
-
         <!-- Row 5: Save Button -->
-        <Button Grid.Row="4" Grid.ColumnSpan="2" 
+        <Button Grid.Row="5" Grid.ColumnSpan="2" 
                 Content="Save" Margin="0,20,0,0" Height="30" Width="100" HorizontalAlignment="Left"/>
     </Grid>
 </UserControl>

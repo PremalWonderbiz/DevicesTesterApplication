@@ -35,7 +35,9 @@ namespace DeviceTesterUI.Views
                     DeviceId = $"D{i:000}",
                     IpAddress = $"192.168.0.{i}",
                     Port = 9000 + i,
-                    IsAuthenticated = (i % 2 == 0) ? true : false
+                    IsAuthenticated = (i % 2 == 0) ? true : false,
+                    Username = "account1",
+                    Password = "password"
                 });
             }
 
