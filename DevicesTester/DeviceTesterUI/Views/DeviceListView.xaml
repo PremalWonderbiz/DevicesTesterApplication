@@ -4,6 +4,8 @@
              Background="White">
     <Grid>
         <DataGrid x:Name="DeviceDataGrid"
+          ItemsSource="{Binding Devices}"
+          SelectedItem="{Binding SelectedDevice, Mode=OneWayToSource}"
           AutoGenerateColumns="False"
           HeadersVisibility="Column"
           CanUserAddRows="False"

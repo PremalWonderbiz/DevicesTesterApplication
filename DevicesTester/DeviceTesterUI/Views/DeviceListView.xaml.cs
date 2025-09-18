@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using DeviceTesterCore.Models;
+using DeviceTesterServices.Repositories;
 
 namespace DeviceTesterUI.Views
 {
@@ -24,27 +25,6 @@ namespace DeviceTesterUI.Views
         public DeviceListView()
         {
             InitializeComponent();
-
-            var deviceList = new List<Device>();
-
-            for (int i = 1; i <= 50; i++)  // 50 rows to test scrolling
-            {
-                deviceList.Add(new Device
-                {
-                    Agent = (i % 3 == 0) ? "Redfish" : (i % 3 == 1) ? "EcoRT" : "SoftdPACManager",
-                    DeviceId = $"D{i:000}",
-                    IpAddress = $"192.168.0.{i}",
-                    Port = 9000 + i,
-                    IsAuthenticated = (i % 2 == 0) ? true : false,
-                    Username = "account1",
-                    Password = "password"
-                });
-            }
-
-            // Bind the DataGrid
-            DeviceDataGrid.ItemsSource = deviceList;
-
-            DeviceDataGrid.SelectionChanged += DeviceDataGrid_SelectionChanged;
         }
 
         // Expose selected device via an event
@@ -52,15 +32,25 @@ namespace DeviceTesterUI.Views
 
         private void DeviceDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selectedDevice = DeviceDataGrid.SelectedItem as Device;
-            DeviceSelected?.Invoke(selectedDevice);
+            if (DeviceDataGrid.SelectedItem is Device selectedDevice)
+                DeviceSelected?.Invoke(selectedDevice);
         }
 
         private void Authenticate_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Device device)
             {
-                MessageBox.Show($"Authenticate clicked for {device.DeviceId}");
+                if (device.IsAuthenticated)
+                {
+                    MessageBox.Show($"{device.DeviceId} is already authenticated");
+                    return;
+                }
+
+                if (DataContext is DeviceViewModel viewModel)
+                {
+                    bool result = viewModel.AuthenticateDevice(device);
+                    MessageBox.Show($"{device.DeviceId} authentication result: {result}");
+                }
             }
         }
 
@@ -68,11 +58,13 @@ namespace DeviceTesterUI.Views
         {
             if (sender is Button btn && btn.DataContext is Device device)
             {
-                MessageBox.Show($"Delete clicked for {device.DeviceId}");
-                // Optional: remove from collection
-                // ((ObservableCollection<DeviceItem>)DeviceDataGrid.ItemsSource).Remove(device);
+                var viewModel = DataContext as DeviceViewModel;
+                if (viewModel != null)
+                {
+                    viewModel.DeleteDevice(device);
+                    MessageBox.Show($"{device.DeviceId} deleted successfully");
+                }
             }
         }
-
     }
 }
