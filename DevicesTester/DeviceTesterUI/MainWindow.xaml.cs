@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DeviceTesterCore.Models;
+using DeviceTesterUI.Views;
 
 namespace DeviceTesterUI
 {
@@ -19,6 +21,16 @@ namespace DeviceTesterUI
         public MainWindow()
         {
             InitializeComponent();
+            // Assuming x:Name="DeviceListView" and "DeviceFormView" are set in XAML
+            DeviceListView.DeviceSelected += OnDeviceSelected;
+        }
+
+        private void OnDeviceSelected(Device? device)
+        {
+            if (device != null)
+            {
+                DeviceFormView.SetDevice(device);
+            }
         }
     }
 }

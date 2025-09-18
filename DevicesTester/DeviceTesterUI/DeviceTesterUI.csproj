@@ -9,12 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DeviceTesterCore\DeviceTesterCore.csproj" />
-    <ProjectReference Include="..\DeviceTesterServices\DeviceTesterServices.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\" />
+    <ProjectReference Include="..\DeviceTesterCore\DeviceTesterCore.csproj" />
+    <ProjectReference Include="..\DeviceTesterServices\DeviceTesterServices.csproj" />
   </ItemGroup>
 
 </Project>

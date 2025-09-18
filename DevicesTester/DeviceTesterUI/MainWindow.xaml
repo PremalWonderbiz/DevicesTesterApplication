@@ -4,9 +4,53 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DeviceTesterUI"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        xmlns:views="clr-namespace:DeviceTesterUI.Views"
+        mc:Ignorable="d"    
+        Title="MainWindow" MinWidth="1250" MinHeight="800" Background="#FFE9E9E9">
+    <Grid Margin="10,10,10,10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2.1*"/>
+            <!-- Left side (Device List + Form) -->
+            <ColumnDefinition Width="3*"/>
+            <!-- Right side (Device Details) -->
+        </Grid.ColumnDefinitions>
+        <DockPanel>
+            <GroupBox Header="Device List" DockPanel.Dock="Top" Height="324" Background="White" ScrollViewer.CanContentScroll="True">
+                <GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" 
+                       FontWeight="Bold" 
+                       VerticalAlignment="Center"/>
+                    </DataTemplate>
+                </GroupBox.HeaderTemplate>
+                <!-- Device List content goes here -->
+                <views:DeviceListView  x:Name="DeviceListView"/>
+            </GroupBox>
 
+            <GroupBox Header="Add New Device" DockPanel.Dock="Bottom" Height="427"  Background="White">
+                <GroupBox.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" 
+                         FontWeight="Bold" 
+                         VerticalAlignment="Center"/>
+                    </DataTemplate>
+                </GroupBox.HeaderTemplate>
+                <!-- Add Device Form goes here -->
+                <views:DeviceFormView x:Name="DeviceFormView"/>
+            </GroupBox>
+        </DockPanel>
+        <Grid Grid.Column="1" Background="White" Margin="10,10,0,6">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Buttons row -->
+                <RowDefinition Height="*"/>
+                <!-- Dynamic content row -->
+            </Grid.RowDefinitions>
+
+            <!-- Row 0: Buttons -->
+            <views:DeviceDetailsView Grid.Row="0"/>
+
+            <!-- Row 1: Dynamic content placeholder -->
+        </Grid>
     </Grid>
 </Window>
