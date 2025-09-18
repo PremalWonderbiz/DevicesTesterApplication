@@ -28,8 +28,7 @@ namespace DeviceTesterUI
 
             DeviceListView.DataContext = _deviceViewModel;
             DeviceFormView.DataContext = _deviceViewModel;
-        }
 
-        
+        }
     }
 }

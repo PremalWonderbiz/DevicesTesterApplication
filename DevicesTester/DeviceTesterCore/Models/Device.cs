@@ -13,11 +13,29 @@ namespace DeviceTesterCore.Models
         private string _deviceId;
         private string _solutionId;
         private string _ipAddress;
-        private int _port;
+        private string _port;
         private string _username;
         private string _password;
         private bool _isAuthenticated;
         private bool _useSecureConnection;
+
+        public Device() { }  // default constructor (needed for XAML binding etc.)
+
+        // Copy constructor
+        public Device(Device other)
+        {
+            if (other == null) return;
+
+            Agent = other.Agent;
+            DeviceId = other.DeviceId;
+            SolutionId = other.SolutionId;
+            IpAddress = other.IpAddress;
+            Port = other.Port;
+            Username = other.Username;
+            Password = other.Password;
+            IsAuthenticated = other.IsAuthenticated;
+            UseSecureConnection = other.UseSecureConnection;
+        }
 
         public string Agent
         {
@@ -43,7 +61,7 @@ namespace DeviceTesterCore.Models
             set { _ipAddress = value; OnPropertyChanged(nameof(IpAddress)); }
         }
 
-        public int Port
+        public string Port
         {
             get => _port;
             set { _port = value; OnPropertyChanged(nameof(Port)); }

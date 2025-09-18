@@ -27,13 +27,9 @@ namespace DeviceTesterUI.Views
             InitializeComponent();
         }
 
-        // Expose selected device via an event
-        public event Action<Device?> DeviceSelected;
-
         private void DeviceDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (DeviceDataGrid.SelectedItem is Device selectedDevice)
-                DeviceSelected?.Invoke(selectedDevice);
+
         }
 
         private void Authenticate_Click(object sender, RoutedEventArgs e)
