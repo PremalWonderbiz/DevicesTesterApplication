@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using DeviceTesterCore.Models;
 
 namespace DeviceTesterUI.Views
@@ -21,14 +12,15 @@ namespace DeviceTesterUI.Views
     /// </summary>
     public partial class DeviceFormView : UserControl
     {
-
         public DeviceFormView()
         {
             InitializeComponent();
         }
 
-
-        private void SaveDevice_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Handles Save button click → validates input, creates/updates device, and persists asynchronously.
+        /// </summary>
+        private async void SaveDevice_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is DeviceViewModel vm)
             {
@@ -65,28 +57,25 @@ namespace DeviceTesterUI.Views
                     return;
                 }
 
+                // Assign IDs if missing
                 if (string.IsNullOrEmpty(deviceToSave.DeviceId))
-                {
                     deviceToSave.DeviceId = Guid.NewGuid().ToString();
-                }
 
                 if (string.IsNullOrEmpty(deviceToSave.SolutionId))
-                {
                     deviceToSave.SolutionId = Guid.NewGuid().ToString();
-                }
 
                 deviceToSave.Port = PortComboBox.Text;
 
-                // check existing
+                // --- Save or Update Device ---
                 if (vm.Devices.Any(d => d.DeviceId == deviceToSave.DeviceId))
-                {                    
-                    vm.UpdateDevice(new Device(deviceToSave));
+                {
+                    await vm.UpdateDeviceAsync(new Device(deviceToSave));
                     MessageBox.Show("Device updated successfully!");
                 }
                 else
                 {
                     deviceToSave.IsAuthenticated = false;
-                    vm.AddDevice(new Device(deviceToSave));
+                    await vm.AddDeviceAsync(new Device(deviceToSave));
                     MessageBox.Show("Device saved successfully!");
                 }
 
@@ -95,9 +84,12 @@ namespace DeviceTesterUI.Views
             }
         }
 
+        /// <summary>
+        /// Handles port selection change → toggles "Other" mode for manual entry.
+        /// </summary>
         private void PortComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (PortComboBox.SelectedItem is string selectedPort) // <- string, not ComboBoxItem
+            if (PortComboBox.SelectedItem is string selectedPort)
             {
                 if (selectedPort == "Other")
                 {
@@ -113,5 +105,4 @@ namespace DeviceTesterUI.Views
             }
         }
     }
-
 }

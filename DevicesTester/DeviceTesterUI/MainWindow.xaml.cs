@@ -20,11 +20,11 @@ namespace DeviceTesterUI
     {
         private readonly DeviceViewModel _deviceViewModel;
 
-        public MainWindow()
+        public MainWindow(DeviceViewModel deviceViewModel)
         {
             InitializeComponent();
             // Assuming x:Name="DeviceListView" and "DeviceFormView" are set in XAML
-            _deviceViewModel = new DeviceViewModel();
+            _deviceViewModel = deviceViewModel;
             this.DataContext = _deviceViewModel;
             DeviceListView.DataContext = _deviceViewModel;
             DeviceFormView.DataContext = _deviceViewModel;

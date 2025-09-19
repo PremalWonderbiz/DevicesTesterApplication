@@ -32,7 +32,7 @@ namespace DeviceTesterUI.Views
 
         }
 
-        private void Authenticate_Click(object sender, RoutedEventArgs e)
+        private async void Authenticate_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Device device)
             {
@@ -44,20 +44,20 @@ namespace DeviceTesterUI.Views
 
                 if (DataContext is DeviceViewModel viewModel)
                 {
-                    bool result = viewModel.AuthenticateDevice(device);
+                    bool result = await viewModel.AuthenticateDeviceAsync(device);
                     MessageBox.Show($"{device.DeviceId} authentication result: {result}");
                 }
             }
         }
 
-        private void Delete_Click(object sender, RoutedEventArgs e)
+        private async void Delete_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button btn && btn.DataContext is Device device)
             {
                 var viewModel = DataContext as DeviceViewModel;
                 if (viewModel != null)
                 {
-                    viewModel.DeleteDevice(device);
+                    await viewModel.DeleteDeviceAsync(device);
                     MessageBox.Show($"{device.DeviceId} deleted successfully");
                 }
             }
