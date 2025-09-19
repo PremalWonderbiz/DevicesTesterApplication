@@ -8,13 +8,13 @@
         </Grid.RowDefinitions>
         <!-- Top Buttons Section -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
-            <Button Content="Get Static Info" Margin="5" Width="120" Height="30"/>
-            <Button Content="Get Dynamic Info" Margin="5" Width="130" Height="30"/>
-            <Button Content="Manage Device Resources" Margin="5" Width="180" Height="30" Click="ManageResources_Click"/>
+            <Button Content="Get Static Info" Margin="5" Width="120" Height="30" IsEnabled="{Binding SelectedDevice.IsAuthenticated}" Click="GetStaticInfo_Click"/>
+            <Button Content="Get Dynamic Info" Margin="5" Width="130" Height="30" IsEnabled="{Binding SelectedDevice.IsAuthenticated}" Click="GetDynamicInfo_Click"/>
+            <Button Content="Manage Device Resources" Margin="5" Width="180" Height="30" Click="ManageResources_Click" IsEnabled="{Binding SelectedDevice.IsAuthenticated}"/>
         </StackPanel>
         <!-- Bottom JSON/Text Section -->
         <ScrollViewer Grid.Row="1">
-            <TextBox x:Name="DeviceJsonTextBox" FontFamily="Consolas" FontSize="12" TextWrapping="NoWrap" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="White" BorderThickness="1" Margin="0,5,0,0" BorderBrush="#FFCCCCCC" FocusVisualStyle="{x:Null}" CaretBrush="Black" Padding="5" Height="650"/>
+            <TextBox x:Name="DeviceJsonTextBox" Text="{Binding DeviceJson, Mode=TwoWay}" FontFamily="Consolas" FontSize="12" TextWrapping="NoWrap" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" IsReadOnly="True" Background="White" BorderThickness="1" Margin="0,5,0,0" BorderBrush="#FFCCCCCC" FocusVisualStyle="{x:Null}" CaretBrush="Black" Padding="5" Height="650"/>
         </ScrollViewer>
     </Grid>
 </UserControl>

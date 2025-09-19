@@ -43,14 +43,24 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <!-- Buttons row -->
-                <RowDefinition Height="*"/>
-                <!-- Dynamic content row -->
             </Grid.RowDefinitions>
 
             <!-- Row 0: Buttons -->
-            <views:DeviceDetailsView Grid.Row="0"/>
-
-            <!-- Row 1: Dynamic content placeholder -->
+            <views:DeviceDetailsView Grid.Row="0">
+                <views:DeviceDetailsView.Style>
+                    <Style TargetType="views:DeviceDetailsView">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding SelectedDevice.Agent}" Value="Redfish">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding SelectedDevice.Agent}" Value="EcoRT">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </views:DeviceDetailsView.Style>
+            </views:DeviceDetailsView>
         </Grid>
     </Grid>
 </Window>

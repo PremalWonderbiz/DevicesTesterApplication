@@ -22,6 +22,7 @@ namespace DeviceTesterServices.Repositories
         {
             if (!File.Exists(_filePath)) return new List<Device>();
             var json = File.ReadAllText(_filePath);
+            if(String.IsNullOrEmpty(json)) return new List<Device>();
             return JsonSerializer.Deserialize<List<Device>>(json) ?? new List<Device>();
         }
 

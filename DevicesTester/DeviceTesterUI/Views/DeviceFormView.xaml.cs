@@ -85,6 +85,7 @@ namespace DeviceTesterUI.Views
                 }
                 else
                 {
+                    deviceToSave.IsAuthenticated = false;
                     vm.AddDevice(new Device(deviceToSave));
                     MessageBox.Show("Device saved successfully!");
                 }

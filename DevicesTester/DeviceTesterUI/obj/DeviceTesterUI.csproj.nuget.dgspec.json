@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj": {}
+    "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj": {}
   },
   "projects": {
-    "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj": {
+    "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj",
+        "projectUniqueName": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj",
         "projectName": "DeviceTesterCore",
-        "projectPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj",
-        "packagesPath": "C:\\Users\\Prem\\.nuget\\packages\\",
-        "outputPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\obj\\",
+        "projectPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj",
+        "packagesPath": "C:\\Users\\Premal Kadam\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Prem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Premal Kadam\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -65,24 +66,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj": {
+    "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj",
+        "projectUniqueName": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj",
         "projectName": "DeviceTesterServices",
-        "projectPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj",
-        "packagesPath": "C:\\Users\\Prem\\.nuget\\packages\\",
-        "outputPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterServices\\obj\\",
+        "projectPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj",
+        "packagesPath": "C:\\Users\\Premal Kadam\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterServices\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Prem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Premal Kadam\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -91,14 +92,15 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj": {
-                "projectPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj"
+              "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj": {
+                "projectPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj"
               }
             }
           }
@@ -134,24 +136,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj": {
+    "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj",
+        "projectUniqueName": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj",
         "projectName": "DeviceTesterUI",
-        "projectPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj",
-        "packagesPath": "C:\\Users\\Prem\\.nuget\\packages\\",
-        "outputPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterUI\\obj\\",
+        "projectPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterUI\\DeviceTesterUI.csproj",
+        "packagesPath": "C:\\Users\\Premal Kadam\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterUI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Prem\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Premal Kadam\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -160,17 +162,18 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0-windows7.0": {
             "targetAlias": "net8.0-windows",
             "projectReferences": {
-              "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj": {
-                "projectPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj"
+              "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj": {
+                "projectPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterCore\\DeviceTesterCore.csproj"
               },
-              "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj": {
-                "projectPath": "D:\\Study\\DeviceTesterDesktopApp\\DevicesTesterApplication\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj"
+              "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj": {
+                "projectPath": "C:\\Users\\Premal Kadam\\Documents\\SODB Device Tester\\DevicesTester\\DeviceTesterServices\\DeviceTesterServices.csproj"
               }
             }
           }
@@ -215,7 +218,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

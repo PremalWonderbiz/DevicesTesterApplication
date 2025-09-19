@@ -13,6 +13,14 @@ namespace DeviceTesterCore.Models
     {
         private readonly DeviceRepository _repo = new();
         public ObservableCollection<Device> Devices { get; set; } = new();
+
+        private string _deviceJson;
+        public string DeviceJson
+        {
+            get => _deviceJson;
+            set { _deviceJson = value; OnPropertyChanged(nameof(DeviceJson)); }
+        }
+
         private string _selectedAgent;
         public string SelectedAgent
         {
@@ -22,7 +30,11 @@ namespace DeviceTesterCore.Models
                     _selectedAgent = value;
                     OnPropertyChanged(nameof(SelectedAgent));
                     if (EditingDevice != null)
+                    {
                         EditingDevice.Agent = _selectedAgent;
+                        LoadPorts(_selectedAgent, false);
+                        return;
+                    } 
                     LoadPorts(_selectedAgent);
             }
         }
@@ -58,11 +70,13 @@ namespace DeviceTesterCore.Models
                     EditingDevice = new Device(_selectedDevice);
                     SelectedAgent = _selectedDevice.Agent;
                     SelectedPort = _selectedDevice.Port;
+                    DeviceJson = string.Empty;
                 }
                 else
                 {
                     EditingDevice = CreateDefaultDevice();
                     SelectedAgent = AvailableAgents.First();
+                    DeviceJson = string.Empty;
                 }
                     
             }
@@ -85,7 +99,7 @@ namespace DeviceTesterCore.Models
 
         public ObservableCollection<string> AvailablePorts { get; } = new ObservableCollection<string>();
 
-        private void LoadPorts(string agent)
+        private void LoadPorts(string agent, bool isNewDevice = true)
         {
             AvailablePorts.Clear();
 
@@ -107,10 +121,24 @@ namespace DeviceTesterCore.Models
                     AvailablePorts.Add("Other");
                     break;
             }
-            // Select first port by default
-            if (AvailablePorts.Count > 0)
-                SelectedPort = AvailablePorts[0];
+
+            if (EditingDevice != null)
+            {
+                if (!isNewDevice)
+                {
+                    // Existing device: select its actual port if present, else "Other"
+                    SelectedPort = AvailablePorts.Contains(EditingDevice.Port)
+                        ? EditingDevice.Port
+                        : (AvailablePorts.Contains("Other") ? "Other" : AvailablePorts.FirstOrDefault());
+                }
+                else
+                {
+                    // New device: select default first port
+                    SelectedPort = AvailablePorts.FirstOrDefault();
+                }
+            }
         }
+
 
         public Device CreateDefaultDevice()
         {
@@ -150,8 +178,8 @@ namespace DeviceTesterCore.Models
 
         public void AddDevice(Device device)
         {
-            Devices.Add(device);          
-            _repo.SaveDevices(Devices);   
+            Devices.Insert(0, device);
+            _repo.SaveDevices(Devices);
         }
 
         public void UpdateDevice(Device device)
