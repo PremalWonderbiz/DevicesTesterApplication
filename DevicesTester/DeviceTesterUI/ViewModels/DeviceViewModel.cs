@@ -32,8 +32,11 @@ namespace DeviceTesterCore.Models
                     if (EditingDevice != null)
                     {
                         EditingDevice.Agent = _selectedAgent;
-                        LoadPorts(_selectedAgent, false);
-                        return;
+                        if (!String.IsNullOrEmpty(EditingDevice.DeviceId))
+                        {
+                            LoadPorts(_selectedAgent, false);
+                            return;
+                        }       
                     } 
                     LoadPorts(_selectedAgent);
             }
