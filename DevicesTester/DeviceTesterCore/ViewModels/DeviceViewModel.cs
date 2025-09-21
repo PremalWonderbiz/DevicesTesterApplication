@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using DeviceTesterCore.Interfaces;
-using DeviceTesterServices.Repositories;
 
 namespace DeviceTesterCore.Models
 {

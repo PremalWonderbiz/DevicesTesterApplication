@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81 d17.13
+VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceTesterUI", "DeviceTesterUI\DeviceTesterUI.csproj", "{176424D9-81FA-4DA2-A8F4-6FDC0131356D}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceTesterServices", "DeviceTesterServices\DeviceTesterServices.csproj", "{EB0188B4-4124-4BD5-98DD-F12A6526CC69}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceTesterTests", "DeviceTesterTests\DeviceTesterTests.csproj", "{A0FB966E-F021-46DA-8D63-F12451677213}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceTesterUITests", "DeviceTesterUITests\DeviceTesterUITests.csproj", "{C449CC64-2621-4776-AA68-2EAEF662B7A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{A0FB966E-F021-46DA-8D63-F12451677213}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0FB966E-F021-46DA-8D63-F12451677213}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0FB966E-F021-46DA-8D63-F12451677213}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C449CC64-2621-4776-AA68-2EAEF662B7A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C449CC64-2621-4776-AA68-2EAEF662B7A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C449CC64-2621-4776-AA68-2EAEF662B7A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C449CC64-2621-4776-AA68-2EAEF662B7A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

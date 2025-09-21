@@ -20,10 +20,17 @@ namespace DeviceTesterServices.Repositories
         /// <summary>
         /// Initializes the repository with a default file path inside the executable directory.
         /// </summary>
-        public DeviceRepository()
+        public DeviceRepository(string? filePath = null)
         {
-            string exeDir = AppDomain.CurrentDomain.BaseDirectory;
-            _filePath = Path.Combine(exeDir, "devices.json");
+            if (string.IsNullOrEmpty(filePath))
+            {
+                string exeDir = AppDomain.CurrentDomain.BaseDirectory;
+                _filePath = Path.Combine(exeDir, "devices.json");
+            }
+            else
+            {
+                _filePath = filePath;
+            }
         }
 
         /// <summary>

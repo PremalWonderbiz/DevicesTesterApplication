@@ -26,7 +26,8 @@ namespace DeviceTesterUI.Views
     /// </summary>
     public partial class DeviceDetailsView : UserControl
     {
-        private string _resourceInputText = string.Empty; 
+        private string _resourceInputText = string.Empty;
+        private DeviceViewModel ViewModel => DataContext as DeviceViewModel;
 
         public DeviceDetailsView()
         {
@@ -53,6 +54,11 @@ namespace DeviceTesterUI.Views
 
         private void GetStaticInfo_Click(object sender, RoutedEventArgs e)
         {
+            if (ViewModel.SelectedDevice == null)
+            {
+                DeviceJsonTextBox.Text = "No device selected.";
+                return;
+            }
             try
             {
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;
@@ -79,6 +85,11 @@ namespace DeviceTesterUI.Views
 
         private void GetDynamicInfo_Click(object sender, RoutedEventArgs e)
         {
+            if (ViewModel.SelectedDevice == null)
+            {
+                DeviceJsonTextBox.Text = "No device selected.";
+                return;
+            }
             try
             {
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;

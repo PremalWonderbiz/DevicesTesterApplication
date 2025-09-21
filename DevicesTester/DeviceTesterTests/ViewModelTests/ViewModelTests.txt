@@ -1,0 +1,264 @@
+﻿******* TEST CODE EXPLANATION *******
+
+## **1. Namespaces and Usings**
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DeviceTesterCore.Interfaces;
+using Moq;
+using NUnit.Framework.Legacy;
+using NUnit.Framework;
+using DeviceTesterCore.Models;
+using System.Collections.ObjectModel;
+```
+
+* `System.*` → standard .NET libraries for collections, tasks, etc.
+* `DeviceTesterCore.Interfaces` → contains `IDeviceRepository`, which we mock.
+* `Moq` → mocking framework to simulate repository behavior.
+* `NUnit.Framework` → test framework attributes like `[Test]`, `[SetUp]`.
+* `NUnit.Framework.Legacy` → allows using `ClassicAssert` (older NUnit style, similar to `Assert`).
+* `DeviceTesterCore.Models` → contains `Device` and `DeviceViewModel`.
+* `System.Collections.ObjectModel` → for `ObservableCollection<Device>` used in the ViewModel.
+
+---
+
+## **2. Test Class**
+
+```csharp
+[TestFixture]
+public class DeviceViewModelTests
+```
+
+* `[TestFixture]` marks the class as a **test container** for NUnit.
+* The class contains all tests for `DeviceViewModel`.
+
+---
+
+## **3. Fields**
+
+```csharp
+private Mock<IDeviceRepository> _mockRepo;
+private DeviceViewModel _vm;
+private List<Device> _devices;
+```
+
+* `_mockRepo` → a mock of `IDeviceRepository` so we can control what the repository returns or tracks saves.
+* `_vm` → the `DeviceViewModel` instance under test.
+* `_devices` → sample device list used as fake data for tests.
+
+---
+
+## **4. Setup Method**
+
+```csharp
+[SetUp]
+public void Setup()
+```
+
+* `[SetUp]` runs **before every test**, initializing common objects.
+* Inside:
+
+```csharp
+_devices = new List<Device>
+{
+    new Device { DeviceId = "D1", Agent = "Redfish", Port = "9000" },
+    new Device { DeviceId = "D2", Agent = "EcoRT", Port = "51443" }
+};
+```
+
+* Prepares a list of two sample devices.
+
+```csharp
+_mockRepo = new Mock<IDeviceRepository>();
+_mockRepo.Setup(r => r.LoadDevicesAsync()).ReturnsAsync(_devices);
+_mockRepo.Setup(r => r.SaveDevicesAsync(It.IsAny<ObservableCollection<Device>>()))
+         .Returns(Task.CompletedTask);
+```
+
+* Sets up mock behavior:
+
+  * `LoadDevicesAsync` → returns `_devices` when called.
+  * `SaveDevicesAsync` → completes immediately (we don’t care about real file saving).
+
+```csharp
+_vm = new DeviceViewModel(_mockRepo.Object);
+```
+
+* Creates the ViewModel, injecting the mock repository.
+
+---
+
+## **5. Test: LoadDevicesAsync**
+
+```csharp
+[Test]
+public async Task LoadDevicesAsync_ShouldPopulateDevices()
+```
+
+* `[Test]` marks this method as a **unit test**.
+* Calls `LoadDevicesAsync()` and checks:
+
+```csharp
+ClassicAssert.AreEqual(2, _vm.Devices.Count);
+ClassicAssert.AreEqual("D1", _vm.Devices[0].DeviceId);
+```
+
+* Ensures devices are loaded correctly into `Devices`.
+
+---
+
+## **6. Test: SelectedDevice set**
+
+```csharp
+[Test]
+public void SelectedDevice_Set_ShouldUpdateEditingDeviceAndPorts()
+```
+
+* Sets `SelectedDevice` in ViewModel.
+* Verifies that:
+
+  * `EditingDevice` is updated with the selected device’s copy.
+  * `SelectedAgent` and `SelectedPort` are set correctly.
+
+```csharp
+ClassicAssert.AreEqual(_devices[0].DeviceId, _vm.EditingDevice.DeviceId);
+ClassicAssert.AreEqual("Redfish", _vm.SelectedAgent);
+ClassicAssert.AreEqual("9000", _vm.SelectedPort);
+```
+
+---
+
+## **7. Test: SelectedDevice null**
+
+```csharp
+[Test]
+public void SelectedDevice_Null_ShouldCreateDefaultDevice()
+```
+
+* If no device is selected, ViewModel should create a default device.
+* Verifies default agent and port.
+
+---
+
+## **8. Test: SelectedAgent change**
+
+```csharp
+[Test]
+public void SelectedAgent_Change_ShouldUpdateEditingDeviceAndPorts()
+```
+
+* Changing the agent type (`Redfish` → `EcoRT`) should:
+
+  * Update `EditingDevice.Agent`.
+  * Load correct ports into `AvailablePorts`.
+* Verifies ports include `51443` and `51499`.
+
+---
+
+## **9. Test: SelectedPort change**
+
+```csharp
+[Test]
+public void SelectedPort_Change_ShouldUpdateEditingDevice()
+```
+
+* Changing the port updates the editing device port.
+
+```csharp
+ClassicAssert.AreEqual("Other", _vm.EditingDevice.Port);
+```
+
+---
+
+## **10. Test: AddDeviceAsync**
+
+```csharp
+[Test]
+public async Task AddDeviceAsync_ShouldAddDeviceToTop()
+```
+
+* Adds a new device to the ViewModel.
+* Verifies:
+
+  * Device is added at the **top of the collection**.
+  * `SaveDevicesAsync` was called **once**.
+
+---
+
+## **11. Test: UpdateDeviceAsync**
+
+```csharp
+[Test]
+public async Task UpdateDeviceAsync_ShouldReplaceSelectedDevice()
+```
+
+* Updates an existing device.
+* Verifies the selected device is replaced in `Devices`.
+* Confirms `SaveDevicesAsync` is called once.
+
+---
+
+## **12. Test: DeleteDeviceAsync**
+
+```csharp
+[Test]
+public async Task DeleteDeviceAsync_ShouldRemoveDevice()
+```
+
+* Deletes a device.
+* Verifies it’s removed from the collection.
+* Confirms `SaveDevicesAsync` was called.
+
+---
+
+## **13. Test: AuthenticateDeviceAsync**
+
+```csharp
+[Test]
+public async Task AuthenticateDeviceAsync_ShouldSetIsAuthenticated()
+```
+
+* Calls `AuthenticateDeviceAsync`.
+* Verifies:
+
+  * `IsAuthenticated` property is set according to result.
+  * Repository is saved.
+
+---
+
+## **14. Test: CreateDefaultDevice**
+
+```csharp
+[Test]
+public void CreateDefaultDevice_ShouldHaveExpectedValues()
+```
+
+* Ensures default device created by `CreateDefaultDevice()` has correct:
+
+  * Agent → `"Redfish"`
+  * Port → `"9000"`
+  * IP → `"127.0.0.1"`
+  * Secure connection → `true`
+
+---
+
+### ✅ **Summary of What This Test Class Does**
+
+1. **Mocks repository** so tests run independently of file storage.
+2. **Tests CRUD operations** (`Add`, `Update`, `Delete`) and async behavior.
+3. **Tests selection logic** (`SelectedDevice`, `SelectedAgent`, `SelectedPort`).
+4. **Tests authentication logic**.
+5. **Tests default device creation**.
+6. Uses **NUnit + Moq** for unit testing without touching the UI.
+
+This covers the **core logic of DeviceViewModel** thoroughly.
+
+---
+
+If you want, I can **also show how to check **PropertyChanged** events in these tests** so you know whether the ViewModel will notify the UI correctly when properties change.
+
+Do you want me to do that?

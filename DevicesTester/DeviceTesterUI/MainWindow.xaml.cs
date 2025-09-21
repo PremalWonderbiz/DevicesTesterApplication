@@ -26,9 +26,6 @@ namespace DeviceTesterUI
             // Assuming x:Name="DeviceListView" and "DeviceFormView" are set in XAML
             _deviceViewModel = deviceViewModel;
             this.DataContext = _deviceViewModel;
-            DeviceListView.DataContext = _deviceViewModel;
-            DeviceFormView.DataContext = _deviceViewModel;
-
         }
     }
 }

@@ -24,7 +24,7 @@
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
                 <!-- Device List content goes here -->
-                <views:DeviceListView  x:Name="DeviceListView"/>
+                <views:DeviceListView  x:Name="DeviceListView" DataContext="{Binding}"/>
             </GroupBox>
 
             <GroupBox Header="Add New Device" DockPanel.Dock="Bottom" Height="427"  Background="White">
@@ -36,7 +36,7 @@
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
                 <!-- Add Device Form goes here -->
-                <views:DeviceFormView x:Name="DeviceFormView"/>
+                <views:DeviceFormView x:Name="DeviceFormView" DataContext="{Binding}"/>
             </GroupBox>
         </DockPanel>
         <Grid Grid.Column="1" Background="White" Margin="10,10,0,6">
@@ -46,7 +46,7 @@
             </Grid.RowDefinitions>
 
             <!-- Row 0: Buttons -->
-            <views:DeviceDetailsView Grid.Row="0">
+            <views:DeviceDetailsView Grid.Row="0" DataContext="{Binding}">
                 <views:DeviceDetailsView.Style>
                     <Style TargetType="views:DeviceDetailsView">
                         <Setter Property="Visibility" Value="Collapsed"/>
