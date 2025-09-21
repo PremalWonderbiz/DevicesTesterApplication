@@ -1,0 +1,46 @@
+[
+  {
+    "Agent": "Redfish",
+    "DeviceId": "7531b877-ea5d-4341-8bc7-de6f0ef8518c",
+    "SolutionId": "6ee62746-0789-4cfb-8090-67f16f9569e4",
+    "IpAddress": "127.0.0.1",
+    "Port": "9000",
+    "Username": "account",
+    "Password": "Pass@123",
+    "IsAuthenticated": true,
+    "UseSecureConnection": true
+  },
+  {
+    "Agent": "SoftdPACManager",
+    "DeviceId": "3e2ad65a-9824-470e-9abb-438f737b4b98",
+    "SolutionId": "646de42d-6591-4eca-8830-e144cf119cb8",
+    "IpAddress": "127.0.0.1",
+    "Port": "443",
+    "Username": "account",
+    "Password": "Pass@123",
+    "IsAuthenticated": true,
+    "UseSecureConnection": true
+  },
+  {
+    "Agent": "EcoRT",
+    "DeviceId": "90a1e29e-55c1-4845-a4f5-2f272ecb049b",
+    "SolutionId": "6b42ff4c-252b-4a16-b0d0-dd28ee65f19c",
+    "IpAddress": "127.0.0.1",
+    "Port": "51443",
+    "Username": "account1",
+    "Password": "Admin@123",
+    "IsAuthenticated": true,
+    "UseSecureConnection": true
+  },
+  {
+    "Agent": "Redfish",
+    "DeviceId": "b2552ae2-ea7b-4186-872d-d32622c29c19",
+    "SolutionId": "c4cda6d2-973c-4079-b2c1-1c3f45d941f9",
+    "IpAddress": "127.0.0.1",
+    "Port": "9000",
+    "Username": "account",
+    "Password": "Pass@123",
+    "IsAuthenticated": true,
+    "UseSecureConnection": true
+  }
+]

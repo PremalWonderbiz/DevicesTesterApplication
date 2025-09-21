@@ -12,18 +12,6 @@
           "bin/placeholder/DeviceTesterCore.dll": {}
         }
       }
-    },
-    "net8.0/win-x86": {
-      "DeviceTesterCore/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v8.0",
-        "compile": {
-          "bin/placeholder/DeviceTesterCore.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/DeviceTesterCore.dll": {}
-        }
-      }
     }
   },
   "libraries": {
@@ -109,11 +97,6 @@
           }
         },
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
-      }
-    },
-    "runtimes": {
-      "win-x86": {
-        "#import": []
       }
     }
   }

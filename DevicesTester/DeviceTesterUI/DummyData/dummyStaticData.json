@@ -1,0 +1,42 @@
+{
+  "Id": "Device-001",
+  "Name": "Redfish Server Sample",
+  "Description": "Test Redfish server device",
+  "Manufacturer": "Contoso",
+  "Model": "Contoso-X1000",
+  "SerialNumber": "SN12345678",
+  "FirmwareVersion": "1.2.3",
+  "HardwareId": "HW-RED1000",
+  "BiosVersion": "BIOS-2.5.1",
+  "UUID": "550e8400-e29b-41d4-a716-446655440000",
+  "PowerState": "On",
+  "NetworkInterfaces": [
+    {
+      "Name": "eth0",
+      "MacAddress": "00:1A:2B:3C:4D:5E",
+      "IPv4Address": "192.168.1.100",
+      "IPv6Address": "fe80::21a:2bff:fe3c:4d5e"
+    }
+  ],
+  "StorageControllers": [
+    {
+      "Name": "RAID Controller 1",
+      "Manufacturer": "Contoso",
+      "FirmwareVersion": "3.1.0"
+    }
+  ],
+  "ProcessorSummary": {
+    "Count": 2,
+    "Model": "Xeon E5-2690",
+    "MaxSpeedMHz": 2900
+  },
+  "MemorySummary": {
+    "TotalSystemMemoryGB": 64,
+    "MemoryModules": [
+      {"SizeGB": 16, "Type": "DDR4"},
+      {"SizeGB": 16, "Type": "DDR4"},
+      {"SizeGB": 16, "Type": "DDR4"},
+      {"SizeGB": 16, "Type": "DDR4"}
+    ]
+  }
+}

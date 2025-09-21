@@ -62,7 +62,7 @@ namespace DeviceTesterUI.Views
             try
             {
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;
-                string filePath = System.IO.Path.Combine(exeDir, "dummyStaticData.json");
+                string filePath = System.IO.Path.Combine(exeDir, "DummyData", "dummyStaticData.json");
                 if (!File.Exists(filePath))
                 {
                     DeviceJsonTextBox.Text = "File not found: " + filePath;
@@ -93,7 +93,7 @@ namespace DeviceTesterUI.Views
             try
             {
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;
-                string filePath = System.IO.Path.Combine(exeDir, "dummyDynamicData.json");
+                string filePath = System.IO.Path.Combine(exeDir, "DummyData", "dummyDynamicData.json");
                 if (!File.Exists(filePath))
                 {
                     DeviceJsonTextBox.Text = "File not found: " + filePath;

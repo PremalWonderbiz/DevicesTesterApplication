@@ -25,7 +25,7 @@ namespace DeviceTesterServices.Repositories
             if (string.IsNullOrEmpty(filePath))
             {
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;
-                _filePath = Path.Combine(exeDir, "devices.json");
+                _filePath = Path.Combine(exeDir, "DummyData", "devices.json");
             }
             else
             {

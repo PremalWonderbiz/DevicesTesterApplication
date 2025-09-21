@@ -18,4 +18,10 @@
     <ProjectReference Include="..\DeviceTesterServices\DeviceTesterServices.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<None Update="DummyData\*.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
 </Project>
