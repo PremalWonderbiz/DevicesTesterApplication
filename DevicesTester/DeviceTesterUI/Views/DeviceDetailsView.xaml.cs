@@ -26,7 +26,8 @@ namespace DeviceTesterUI.Views
     /// </summary>
     public partial class DeviceDetailsView : UserControl
     {
-        private string _resourceInputText = string.Empty;
+        private string _staticResourceInput = string.Empty;
+        private string _dynamicResourceInput = string.Empty;
         private DeviceViewModel ViewModel => DataContext as DeviceViewModel;
 
         public DeviceDetailsView()
@@ -41,16 +42,23 @@ namespace DeviceTesterUI.Views
             var popup = new ResourceInputWindow
             {
                 Owner = Window.GetWindow(this),
+
                 // Pass previous data to popup
-                ResourceText = _resourceInputText
+                StaticData = _staticResourceInput,   
+                DynamicData = _dynamicResourceInput  
             };
 
             if (popup.ShowDialog() == true)
             {
-                _resourceInputText = popup.ResourceText; // Save persistent data
-                MessageBox.Show("Saved resource data:\n" + _resourceInputText);
+                _staticResourceInput = popup.StaticData;
+                _dynamicResourceInput = popup.DynamicData;
+
+                MessageBox.Show(
+                    "Configurations saved"
+                );
             }
         }
+
 
         private void GetStaticInfo_Click(object sender, RoutedEventArgs e)
         {

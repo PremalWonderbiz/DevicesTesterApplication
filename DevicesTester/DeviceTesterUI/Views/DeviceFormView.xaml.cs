@@ -22,51 +22,36 @@ namespace DeviceTesterUI.Views
         /// </summary>
         private async void SaveDevice_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is DeviceViewModel vm)
+            if (DataContext is DeviceViewModel vm && !vm.HasErrors)
             {
                 var deviceToSave = vm.EditingDevice;
-
-                // --- UI-Level Validations ---
-                if (string.IsNullOrEmpty(deviceToSave.Agent))
-                {
-                    MessageBox.Show("Agent is required", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(deviceToSave.IpAddress) || !System.Net.IPAddress.TryParse(deviceToSave.IpAddress, out _))
-                {
-                    MessageBox.Show("A valid IP address is required", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (!int.TryParse(PortComboBox.Text, out int port) || port <= 0 || port > 65535)
-                {
-                    MessageBox.Show("Port must be a valid number between 1 and 65535", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(deviceToSave.Username))
-                {
-                    MessageBox.Show("Username is required", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (string.IsNullOrEmpty(deviceToSave.Password))
-                {
-                    MessageBox.Show("Password is required", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
 
                 // Assign IDs if missing
                 if (string.IsNullOrEmpty(deviceToSave.DeviceId))
                     deviceToSave.DeviceId = Guid.NewGuid().ToString();
-
                 if (string.IsNullOrEmpty(deviceToSave.SolutionId))
                     deviceToSave.SolutionId = Guid.NewGuid().ToString();
 
-                deviceToSave.Port = PortComboBox.Text;
+                // Ensure correct port assignment
+                deviceToSave.Port = vm.EditingDevice.Port;
 
-                // --- Save or Update Device ---
+                // 🔹 Duplicate IP + Port check (ignore the same DeviceId)
+                bool duplicateIpPort = vm.Devices.Any(d =>
+                    d.IpAddress == deviceToSave.IpAddress &&
+                    d.Port == deviceToSave.Port &&
+                    d.DeviceId != deviceToSave.DeviceId);
+
+                if (duplicateIpPort)
+                {
+                    MessageBox.Show(
+                        $"A device with same IP and Port already exists.",
+                        "Duplicate Device",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Update or Add
                 if (vm.Devices.Any(d => d.DeviceId == deviceToSave.DeviceId))
                 {
                     await vm.UpdateDeviceAsync(new Device(deviceToSave));
@@ -79,10 +64,14 @@ namespace DeviceTesterUI.Views
                     MessageBox.Show("Device saved successfully!");
                 }
 
-                // Reset form with defaults
+                // Reset form and selection
+                vm.SelectedDevice = null;
                 vm.EditingDevice = vm.CreateDefaultDevice();
+                vm.EditingDevice.Agent = vm.AvailableAgents.First();
+                vm.EditingDevice.Port = vm.AvailablePorts.FirstOrDefault();
             }
         }
+
 
         /// <summary>
         /// Handles port selection change → toggles "Other" mode for manual entry.
@@ -102,6 +91,17 @@ namespace DeviceTesterUI.Views
                     PortComboBox.IsEditable = false;
                     PortComboBox.Text = selectedPort;
                 }
+            }
+        }
+
+        private void ClearDevice_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is DeviceViewModel vm)
+            {
+                vm.SelectedDevice = null;                  // <-- reset selection
+                vm.EditingDevice = vm.CreateDefaultDevice();
+                vm.EditingDevice.Agent = vm.AvailableAgents.First();
+                vm.EditingDevice.Port = vm.AvailablePorts.FirstOrDefault();
             }
         }
     }

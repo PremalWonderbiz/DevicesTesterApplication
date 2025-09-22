@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace DeviceTesterCore.Models
 {
-    public class Device : INotifyPropertyChanged
+    public class Device : INotifyPropertyChanged, IDataErrorInfo
     {
         private string _agent;
         private string _deviceId;
@@ -94,5 +91,55 @@ namespace DeviceTesterCore.Models
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        // ---------------- Validation (IDataErrorInfo) ----------------
+        public string Error => null; // not used
+
+        public string this[string columnName]
+        {
+            get
+            {
+                switch (columnName)
+                {
+                    case nameof(Agent):
+                        if (string.IsNullOrWhiteSpace(Agent))
+                            return "Agent is required";
+                        break;
+
+                    case nameof(IpAddress):
+                        if (string.IsNullOrWhiteSpace(IpAddress) || !IPAddress.TryParse(IpAddress, out _))
+                            return "Invalid IP address";
+                        break;
+
+                    case nameof(Port):
+                        if (!int.TryParse(Port, out int port) || port <= 0 || port > 65535)
+                            return "Port must be between 1 and 65535";
+                        break;
+
+                    case nameof(Username):
+                        if (string.IsNullOrWhiteSpace(Username))
+                            return "Username is required";
+                        break;
+
+                    case nameof(Password):
+                        if (string.IsNullOrWhiteSpace(Password))
+                            return "Password is required";
+                        break;
+
+                    case nameof(DeviceId):
+                        if (!string.IsNullOrEmpty(DeviceId) && !Guid.TryParse(DeviceId, out _))
+                            return "DeviceId must be a valid GUID";
+                        break;
+
+                    case nameof(SolutionId):
+                        if (!string.IsNullOrEmpty(SolutionId) && !Guid.TryParse(SolutionId, out _))
+                            return "SolutionId must be a valid GUID";
+                        break;
+                }
+                return null;
+            }
+        }
+        public bool HasErrors => GetType().GetProperties()
+       .Any(p => !string.IsNullOrEmpty(this[p.Name]));
     }
 }

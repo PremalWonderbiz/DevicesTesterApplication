@@ -8,15 +8,16 @@ using DeviceTesterCore.Interfaces;
 namespace DeviceTesterCore.Models
 {
     /// <summary>
-    /// ViewModel that manages devices, selection state, and device editing logic.
-    /// It also handles agent/port options and provides CRUD operations via repository.
+    /// ViewModel that manages device data, editing state, 
+    /// available agent/port options, and persistence via repository.
+    /// Implements INotifyPropertyChanged for UI binding.
     /// </summary>
     public class DeviceViewModel : INotifyPropertyChanged
     {
         private readonly IDeviceRepository _repo;
 
         /// <summary>
-        /// List of all devices loaded from repository.
+        /// List of all devices loaded from the repository.
         /// </summary>
         public ObservableCollection<Device> Devices { get; set; } = new();
 
@@ -24,6 +25,7 @@ namespace DeviceTesterCore.Models
 
         /// <summary>
         /// Current JSON (static or dynamic) shown for selected device.
+        /// Used to preview device details.
         /// </summary>
         public string DeviceJson
         {
@@ -35,61 +37,12 @@ namespace DeviceTesterCore.Models
             }
         }
 
-        private string _selectedAgent;
-
-        /// <summary>
-        /// Currently selected agent type (e.g., Redfish, EcoRT, etc.).
-        /// Updating this will also refresh available ports.
-        /// </summary>
-        public string SelectedAgent
-        {
-            get => _selectedAgent;
-            set
-            {
-                _selectedAgent = value;
-                OnPropertyChanged(nameof(SelectedAgent));
-
-                if (EditingDevice != null)
-                {
-                    EditingDevice.Agent = _selectedAgent;
-
-                    if (!string.IsNullOrEmpty(EditingDevice.DeviceId))
-                    {
-                        LoadPorts(_selectedAgent, isNewDevice: false);
-                        return;
-                    }
-                }
-
-                LoadPorts(_selectedAgent);
-            }
-        }
-
-        private string _selectedPort;
-
-        /// <summary>
-        /// Currently selected port for the active device.
-        /// </summary>
-        public string SelectedPort
-        {
-            get => _selectedPort;
-            set
-            {
-                if (_selectedPort != value)
-                {
-                    _selectedPort = value;
-                    OnPropertyChanged(nameof(SelectedPort));
-
-                    if (EditingDevice != null)
-                        EditingDevice.Port = _selectedPort;
-                }
-            }
-        }
-
         private Device _selectedDevice;
 
         /// <summary>
-        /// Device currently selected in the list.
-        /// When updated, creates a copy for editing or loads a default device if null.
+        /// Device currently selected in the list view.
+        /// Creates an editable copy (EditingDevice) or 
+        /// resets to default if selection is cleared.
         /// </summary>
         public Device SelectedDevice
         {
@@ -102,14 +55,11 @@ namespace DeviceTesterCore.Models
                 if (_selectedDevice != null)
                 {
                     EditingDevice = new Device(_selectedDevice);
-                    SelectedAgent = _selectedDevice.Agent;
-                    SelectedPort = _selectedDevice.Port;
                     DeviceJson = string.Empty;
                 }
                 else
                 {
                     EditingDevice = CreateDefaultDevice();
-                    SelectedAgent = AvailableAgents.First();
                     DeviceJson = string.Empty;
                 }
             }
@@ -118,42 +68,72 @@ namespace DeviceTesterCore.Models
         private Device _editingDevice;
 
         /// <summary>
-        /// A temporary device used for editing (copy of selected device).
+        /// Temporary device object used for editing.
+        /// This is either a copy of the selected device or a default new one.
         /// </summary>
         public Device EditingDevice
         {
             get => _editingDevice;
             set
             {
+                if (_editingDevice != null)
+                    _editingDevice.PropertyChanged -= EditingDevice_PropertyChanged;
+
                 _editingDevice = value;
+
+                if (_editingDevice != null)
+                {
+                    _editingDevice.PropertyChanged += EditingDevice_PropertyChanged;
+
+                    // Refresh ports whenever Agent changes
+                    LoadPorts(_editingDevice.Agent, isNewDevice: string.IsNullOrEmpty(_editingDevice.DeviceId));
+                }
+
                 OnPropertyChanged(nameof(EditingDevice));
+                OnPropertyChanged(nameof(HasErrors));
             }
         }
 
-        private ObservableCollection<string> _availableAgents;
+        /// <summary>
+        /// Handles property changes in EditingDevice to trigger error checks
+        /// and update available ports when Agent changes.
+        /// </summary>
+        private void EditingDevice_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Device.Agent))
+            {
+                LoadPorts(EditingDevice.Agent, isNewDevice: string.IsNullOrEmpty(EditingDevice.DeviceId));
+            }
+
+            OnPropertyChanged(nameof(HasErrors));
+        }
+
+        /// <summary>
+        /// True if the EditingDevice has validation errors.
+        /// Used to enable/disable the Save button.
+        /// </summary>
+        public bool HasErrors => EditingDevice != null && EditingDevice.HasErrors;
 
         /// <summary>
         /// List of supported agent types.
         /// </summary>
-        public ObservableCollection<string> AvailableAgents
+        public ObservableCollection<string> AvailableAgents { get; } = new()
         {
-            get => _availableAgents;
-            set
-            {
-                _availableAgents = value;
-                OnPropertyChanged(nameof(AvailableAgents));
-            }
-        }
+            "Redfish",
+            "EcoRT",
+            "SoftdPACManager"
+        };
 
         /// <summary>
         /// List of ports available for the selected agent.
+        /// Bound to the Port ComboBox in the form.
         /// </summary>
         public ObservableCollection<string> AvailablePorts { get; } = new();
 
         /// <summary>
         /// Loads available ports for the given agent type.
-        /// If device exists, tries to keep its assigned port.
-        /// Otherwise, assigns the first default port.
+        /// If editing an existing device, tries to keep its assigned port.
+        /// Otherwise, assigns a default port.
         /// </summary>
         private void LoadPorts(string agent, bool isNewDevice = true)
         {
@@ -182,21 +162,19 @@ namespace DeviceTesterCore.Models
             {
                 if (!isNewDevice)
                 {
-                    // Existing device: keep actual port if available, else fallback to "Other"
-                    SelectedPort = AvailablePorts.Contains(EditingDevice.Port)
+                    EditingDevice.Port = AvailablePorts.Contains(EditingDevice.Port)
                         ? EditingDevice.Port
                         : (AvailablePorts.Contains("Other") ? "Other" : AvailablePorts.FirstOrDefault());
                 }
                 else
                 {
-                    // New device: select first port
-                    SelectedPort = AvailablePorts.FirstOrDefault();
+                    EditingDevice.Port = AvailablePorts.FirstOrDefault();
                 }
             }
         }
 
         /// <summary>
-        /// Creates a default device with preconfigured values.
+        /// Creates a new default device with preconfigured values.
         /// </summary>
         public Device CreateDefaultDevice()
         {
@@ -207,7 +185,7 @@ namespace DeviceTesterCore.Models
                 SolutionId = string.Empty,
                 IpAddress = "127.0.0.1",
                 Port = "9000",
-                Username = "account",
+                Username = "account1",
                 Password = "Pass@123",
                 UseSecureConnection = true,
                 IsAuthenticated = false
@@ -215,26 +193,17 @@ namespace DeviceTesterCore.Models
         }
 
         /// <summary>
-        /// Initializes the ViewModel with default agents and loads devices from repository.
+        /// Initializes the ViewModel with default agents and loads devices.
         /// </summary>
         public DeviceViewModel(IDeviceRepository repo)
         {
             _repo = repo;
-
-            AvailableAgents = new ObservableCollection<string>
-            {
-                "Redfish",
-                "EcoRT",
-                "SoftdPACManager"
-            };
-
-            SelectedAgent = AvailableAgents.First();
             _ = LoadDevicesAsync();
             EditingDevice = CreateDefaultDevice();
         }
 
         /// <summary>
-        /// Reloads devices from repository asynchronously.
+        /// Reloads devices from the repository asynchronously.
         /// </summary>
         public async Task LoadDevicesAsync()
         {
@@ -246,7 +215,7 @@ namespace DeviceTesterCore.Models
         }
 
         /// <summary>
-        /// Adds a new device to the list (on top) and persists it asynchronously.
+        /// Adds a new device and persists the list to the repository.
         /// </summary>
         public async Task AddDeviceAsync(Device device)
         {
@@ -255,7 +224,7 @@ namespace DeviceTesterCore.Models
         }
 
         /// <summary>
-        /// Updates the selected device in the list and persists changes asynchronously.
+        /// Updates the currently selected device and saves the changes.
         /// </summary>
         public async Task UpdateDeviceAsync(Device device)
         {
@@ -266,7 +235,7 @@ namespace DeviceTesterCore.Models
         }
 
         /// <summary>
-        /// Deletes the given device and saves repository state asynchronously.
+        /// Deletes a device and persists the updated list.
         /// </summary>
         public async Task DeleteDeviceAsync(Device device)
         {
@@ -276,7 +245,7 @@ namespace DeviceTesterCore.Models
 
         /// <summary>
         /// Dummy authentication method that randomly succeeds or fails.
-        /// Updates the device authentication state and persists it.
+        /// Updates device authentication state and persists it.
         /// </summary>
         public async Task<bool> AuthenticateDeviceAsync(Device device)
         {
@@ -284,16 +253,17 @@ namespace DeviceTesterCore.Models
             device.IsAuthenticated = result;
 
             await _repo.SaveDevicesAsync(Devices);
-
-            // Notify UI of changes
             OnPropertyChanged(nameof(Devices));
             return result;
         }
 
+        /// <summary>
+        /// Event triggered when a property changes (INotifyPropertyChanged).
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Helper to raise property changed events.
+        /// Raises property changed notification for a given property.
         /// </summary>
         private void OnPropertyChanged(string prop) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));

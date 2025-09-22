@@ -51,8 +51,8 @@ namespace DeviceTesterTests.ViewModelTests
             _vm.SelectedDevice = _devices[0];
 
             ClassicAssert.AreEqual(_devices[0].DeviceId, _vm.EditingDevice.DeviceId);
-            ClassicAssert.AreEqual("Redfish", _vm.SelectedAgent);
-            ClassicAssert.AreEqual("9000", _vm.SelectedPort);
+            ClassicAssert.AreEqual("Redfish", _vm.EditingDevice.Agent);
+            ClassicAssert.AreEqual("9000", _vm.EditingDevice.Port);
         }
 
         [Test]
@@ -61,15 +61,15 @@ namespace DeviceTesterTests.ViewModelTests
             _vm.SelectedDevice = null;
 
             ClassicAssert.IsNotNull(_vm.EditingDevice);
-            ClassicAssert.AreEqual("Redfish", _vm.SelectedAgent);
-            ClassicAssert.AreEqual("9000", _vm.SelectedPort);
+            ClassicAssert.AreEqual("Redfish", _vm.EditingDevice.Agent);
+            ClassicAssert.AreEqual("9000", _vm.EditingDevice.Port);
         }
 
         [Test]
         public void SelectedAgent_Change_ShouldUpdateEditingDeviceAndPorts()
         {
             _vm.SelectedDevice = _devices[0];
-            _vm.SelectedAgent = "EcoRT";
+            _vm.EditingDevice.Agent = "EcoRT";
 
             ClassicAssert.AreEqual("EcoRT", _vm.EditingDevice.Agent);
             ClassicAssert.Contains("51443", _vm.AvailablePorts);
@@ -80,7 +80,7 @@ namespace DeviceTesterTests.ViewModelTests
         public void SelectedPort_Change_ShouldUpdateEditingDevice()
         {
             _vm.SelectedDevice = _devices[0];
-            _vm.SelectedPort = "Other";
+            _vm.EditingDevice.Port = "Other";
 
             ClassicAssert.AreEqual("Other", _vm.EditingDevice.Port);
         }

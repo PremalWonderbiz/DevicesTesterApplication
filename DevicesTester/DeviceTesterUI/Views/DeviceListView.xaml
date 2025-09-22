@@ -19,25 +19,23 @@
           ScrollViewer.HorizontalScrollBarVisibility="Auto"
           IsReadOnly="True"
           GridLinesVisibility="None"
-                  BorderBrush="LightGray">
+          BorderBrush="LightGray"
+          HorizontalAlignment="Stretch">
 
-            <!-- Header padding -->
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Padding" Value="5"/>
                 </Style>
             </DataGrid.ColumnHeaderStyle>
 
-            <!-- Row cell padding (for TextColumns) -->
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
-                    <!--<Setter Property="BorderThickness" Value="0"/>-->
                     <Setter Property="BorderBrush" Value="LightGray"/>
                 </Style>
             </DataGrid.CellStyle>
 
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Agent" Binding="{Binding Agent}" Width="Auto">
+                <DataGridTextColumn Header="Agent" Binding="{Binding Agent}" Width="*" >
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Padding" Value="5"/>
@@ -46,7 +44,7 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <DataGridTextColumn Header="IP Address" Binding="{Binding IpAddress}" Width="Auto">
+                <DataGridTextColumn Header="IP Address" Binding="{Binding IpAddress}" Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Padding" Value="5"/>
@@ -55,7 +53,7 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <DataGridTextColumn Header="Port" Binding="{Binding Port}" Width="Auto">
+                <DataGridTextColumn Header="Port" Binding="{Binding Port}" Width="*">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Padding" Value="5"/>
@@ -64,8 +62,7 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- Buttons column -->
-                <DataGridTemplateColumn Header="Common Operations" Width="Auto">
+                <DataGridTemplateColumn Header="Common Operations" Width="2*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <UniformGrid Rows="1" Columns="2" HorizontalAlignment="Left" Margin="5,2">
@@ -76,7 +73,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Header="Authenticated" Width="Auto">
+                <DataGridTemplateColumn Header="Authenticated" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Ellipse Width="12" Height="12" VerticalAlignment="Center"

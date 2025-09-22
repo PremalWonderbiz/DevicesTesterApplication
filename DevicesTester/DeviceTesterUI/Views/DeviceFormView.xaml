@@ -2,7 +2,55 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:DeviceTesterUI.Helpers"
+             xmlns:conv="clr-namespace:DeviceTesterUI.Converters"
              Background="White">
+    <UserControl.Resources>
+        <conv:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+
+        <!-- Error Template: input with red border and error text below -->
+        <ControlTemplate x:Key="ValidationErrorTemplate">
+            <StackPanel>
+                <Border BorderBrush="Red" BorderThickness="1">
+                    <AdornedElementPlaceholder/>
+                </Border>
+                <TextBlock Foreground="Red" FontSize="10"
+                       Text="{Binding [0].ErrorContent}"/>
+            </StackPanel>
+        </ControlTemplate>
+
+        <!-- Style for TextBoxes to use the template -->
+        <Style TargetType="TextBox">
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Style for PasswordBox -->
+        <Style TargetType="PasswordBox">
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                        Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="ComboBox">
+            <Setter Property="Validation.ErrorTemplate" Value="{StaticResource ValidationErrorTemplate}"/>
+            <Setter Property="IsEditable" Value="False"/>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                    Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
 
     <Grid Margin="10">
         <Grid.ColumnDefinitions>
@@ -22,51 +70,61 @@
         <!-- Row 1: Agent & IP Address -->
         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,10,10,0">
             <Label Content="Agent*" FontSize="11"/>
-            <ComboBox 
-                      Height="25" FontSize="11"
+            <ComboBox Height="25" FontSize="11"
                       ItemsSource="{Binding AvailableAgents}"
-                      SelectedItem="{Binding SelectedAgent, Mode=TwoWay}"
+                      SelectedItem="{Binding EditingDevice.Agent, Mode=TwoWay}"
                       VerticalContentAlignment="Center"/>
         </StackPanel>
 
         <!-- Row 2: IP Address & Port -->
-        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,10,10,0">
+        <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,15,10,0">
             <Label Content="IP Address*" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.IpAddress, Mode=TwoWay}"
+                     Text="{Binding EditingDevice.IpAddress, Mode=TwoWay,
+                                    UpdateSourceTrigger=PropertyChanged,
+                                    ValidatesOnDataErrors=True,
+                                    NotifyOnValidationError=True }"
                      VerticalContentAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0">
+        <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,15,0,0">
             <Label Content="Port*" FontSize="11"/>
-            <ComboBox 
-                      x:Name="PortComboBox"
-                      Height="25" FontSize="11"
-                      ItemsSource="{Binding AvailablePorts}"
-                      SelectedItem="{Binding SelectedPort, Mode=TwoWay}"
-                      SelectionChanged="PortComboBox_SelectionChanged"
-                      VerticalContentAlignment="Center"/>
+            <ComboBox x:Name="PortComboBox"
+          Height="25" FontSize="11"
+          ItemsSource="{Binding AvailablePorts}"
+          Text="{Binding EditingDevice.Port, Mode=TwoWay,
+                         UpdateSourceTrigger=PropertyChanged,
+                         ValidatesOnDataErrors=True,
+                         NotifyOnValidationError=True}"
+          SelectionChanged="PortComboBox_SelectionChanged"
+          VerticalContentAlignment="Center"
+          IsEditable="False" />
         </StackPanel>
 
         <!-- Row 3: Username & Password -->
-        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,10,10,0">
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,15,10,0">
             <Label Content="Username*" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.Username, Mode=TwoWay}"
+                     Text="{Binding EditingDevice.Username, Mode=TwoWay,
+                                    UpdateSourceTrigger=PropertyChanged,
+                                    ValidatesOnDataErrors=True,
+                                    NotifyOnValidationError=True}"
                      VerticalContentAlignment="Center"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,10,0,0">
+        <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,15,0,0">
             <Label Content="Password*" FontSize="11"/>
-            <!-- PasswordBox needs helper binding in real app -->
             <PasswordBox Height="25" FontSize="11"
-                         local:PasswordBoxHelper.BoundPassword="{Binding EditingDevice.Password, Mode=TwoWay}"
+                         local:PasswordBoxHelper.BoundPassword="{Binding EditingDevice.Password, Mode=TwoWay,
+                                                                      UpdateSourceTrigger=PropertyChanged,
+                                                                      ValidatesOnDataErrors=True,
+                                                                      NotifyOnValidationError=True}"
                          VerticalContentAlignment="Center"/>
         </StackPanel>
 
         <!-- Row 4: Secure Connection -->
-        <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,10,10,0">
-            <Label Content="Use Secure Connection*" FontSize="11"/>
+        <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,15,10,0" Orientation="Horizontal">
+            <Label Content="Use Secure Connection*" FontSize="11" Margin="0,0,5,0"/>
             <CheckBox IsChecked="{Binding EditingDevice.UseSecureConnection, Mode=TwoWay}"
                       VerticalAlignment="Center" VerticalContentAlignment="Center"/>
         </StackPanel>
@@ -75,21 +133,33 @@
         <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,10,10,0">
             <Label Content="DeviceId" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.DeviceId, Mode=TwoWay}"
+                     Text="{Binding EditingDevice.DeviceId, Mode=TwoWay,
+                                    UpdateSourceTrigger=PropertyChanged,
+                                    ValidatesOnDataErrors=True,
+                                    NotifyOnValidationError=True}"
                      VerticalContentAlignment="Center"/>
         </StackPanel>
 
         <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,10,0,0">
             <Label Content="SolutionId" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.SolutionId, Mode=TwoWay}"
+                     Text="{Binding EditingDevice.SolutionId, Mode=TwoWay,
+                                    UpdateSourceTrigger=PropertyChanged,
+                                    ValidatesOnDataErrors=True,
+                                    NotifyOnValidationError=True}"
                      VerticalContentAlignment="Center"/>
         </StackPanel>
 
         <!-- Row 6: Save Button -->
-        <Button Grid.Row="5" Grid.ColumnSpan="2" 
-                Content="Save" 
-                Click="SaveDevice_Click"
-                Margin="0,20,0,0" Height="30" Width="100" HorizontalAlignment="Left"/>
+        <StackPanel Grid.Row="5" Grid.Column="0" Orientation="Horizontal" Margin="0,25,10,0" >
+            <Button Content="Save" Margin="0,0,10,0"
+            Click="SaveDevice_Click"
+            Height="30" Width="100"
+            IsEnabled="{Binding HasErrors, Converter={StaticResource InverseBooleanConverter}}"/>
+    
+            <Button Content="Clear" 
+            Click="ClearDevice_Click"
+            Height="30" Width="100"/>
+        </StackPanel>
     </Grid>
 </UserControl>

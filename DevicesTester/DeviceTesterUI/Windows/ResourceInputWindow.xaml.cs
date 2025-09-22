@@ -19,10 +19,16 @@ namespace DeviceTesterUI.Windows
     /// </summary>
     public partial class ResourceInputWindow : Window
     {
-        public string ResourceText
+        public string StaticData
         {
-            get => ResourceInputTextBox.Text;
-            set => ResourceInputTextBox.Text = value; 
+            get => StaticDataTextBox.Text;
+            set => StaticDataTextBox.Text = value;
+        }
+
+        public string DynamicData
+        {
+            get => DynamicDataTextBox.Text;
+            set => DynamicDataTextBox.Text = value;
         }
 
         public ResourceInputWindow()
@@ -32,8 +38,7 @@ namespace DeviceTesterUI.Windows
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            ResourceText = ResourceInputTextBox.Text;
-            DialogResult = true; // Closes the window and returns success
+            DialogResult = true;
         }
     }
 }

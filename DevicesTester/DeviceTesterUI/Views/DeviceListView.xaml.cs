@@ -36,16 +36,13 @@ namespace DeviceTesterUI.Views
         {
             if (sender is Button btn && btn.DataContext is Device device)
             {
-                if (device.IsAuthenticated)
-                {
-                    MessageBox.Show($"{device.DeviceId} is already authenticated");
-                    return;
-                }
-
                 if (DataContext is DeviceViewModel viewModel)
                 {
                     bool result = await viewModel.AuthenticateDeviceAsync(device);
-                    MessageBox.Show($"{device.DeviceId} authentication result: {result}");
+                    if (result)
+                        MessageBox.Show($"Authentication succeeded");
+                    else
+                        MessageBox.Show($"Authentication failed");
                 }
             }
         }
@@ -57,8 +54,16 @@ namespace DeviceTesterUI.Views
                 var viewModel = DataContext as DeviceViewModel;
                 if (viewModel != null)
                 {
-                    await viewModel.DeleteDeviceAsync(device);
-                    MessageBox.Show($"{device.DeviceId} deleted successfully");
+                    MessageBoxResult result = MessageBox.Show(
+                    $"Are you sure you want to delete?",
+                    "Delete Confirmation",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        await viewModel.DeleteDeviceAsync(device);
+                        MessageBox.Show($"Device deleted successfully");
+                    }
                 }
             }
         }
