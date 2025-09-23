@@ -10,7 +10,10 @@ namespace DeviceTesterUI.Helpers
                 "BoundPassword",
                 typeof(string),
                 typeof(PasswordBoxHelper),
-                new PropertyMetadata(string.Empty, OnBoundPasswordChanged));
+                new FrameworkPropertyMetadata(
+                    null,
+                    FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
+                    OnBoundPasswordChanged));
 
         public static string GetBoundPassword(DependencyObject dp) =>
             (string)dp.GetValue(BoundPassword);
@@ -41,6 +44,8 @@ namespace DeviceTesterUI.Helpers
                 // Only update the property if it is actually different
                 if (GetBoundPassword(passwordBox) != passwordBox.Password)
                     SetBoundPassword(passwordBox, passwordBox.Password);
+
+                passwordBox.GetBindingExpression(BoundPassword)?.UpdateSource();
             }
         }
     }

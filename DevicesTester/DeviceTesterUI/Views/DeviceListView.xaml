@@ -20,7 +20,8 @@
           IsReadOnly="True"
           GridLinesVisibility="None"
           BorderBrush="LightGray"
-          HorizontalAlignment="Stretch">
+          HorizontalAlignment="Stretch"
+                  SelectionMode="Single">
 
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">

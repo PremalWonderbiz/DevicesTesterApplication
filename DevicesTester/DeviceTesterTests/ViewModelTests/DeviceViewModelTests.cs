@@ -33,7 +33,7 @@ namespace DeviceTesterTests.ViewModelTests
             _mockRepo.Setup(r => r.SaveDevicesAsync(It.IsAny<ObservableCollection<Device>>()))
                      .Returns(Task.CompletedTask);
 
-            _vm = new DeviceViewModel(_mockRepo.Object);
+            //_vm = new DeviceViewModel(_mockRepo.Object);
         }
 
         [Test]

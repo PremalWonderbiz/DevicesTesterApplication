@@ -92,8 +92,8 @@ namespace DeviceTesterCore.Models
         private void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        // ---------------- Validation (IDataErrorInfo) ----------------
-        public string Error => null; // not used
+        //Validation (IDataErrorInfo)
+        public string Error => null;
 
         public string this[string columnName]
         {

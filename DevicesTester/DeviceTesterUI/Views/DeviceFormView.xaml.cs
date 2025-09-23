@@ -48,6 +48,10 @@ namespace DeviceTesterUI.Views
                         "Duplicate Device",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
+                        vm.SelectedDevice = null;
+                        vm.EditingDevice = vm.CreateDefaultDevice();
+                        vm.EditingDevice.Agent = vm.AvailableAgents.First();
+                        vm.EditingDevice.Port = vm.AvailablePorts.FirstOrDefault();
                     return;
                 }
 

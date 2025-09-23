@@ -28,14 +28,38 @@ namespace DeviceTesterUI.Views
     {
         private string _staticResourceInput = string.Empty;
         private string _dynamicResourceInput = string.Empty;
+        private DeviceViewModel _vm;
         private DeviceViewModel ViewModel => DataContext as DeviceViewModel;
 
         public DeviceDetailsView()
         {
             InitializeComponent();
             DeviceJsonTextBox.Text = string.Empty;
+            DataContextChanged += DeviceDetailsView_DataContextChanged;
         }
 
+        private void DeviceDetailsView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (_vm != null)
+                _vm.PropertyChanged -= Vm_PropertyChanged;
+
+            _vm = DataContext as DeviceViewModel;
+
+            if (_vm != null)
+                _vm.PropertyChanged += Vm_PropertyChanged;
+        }
+
+        private void Vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(DeviceViewModel.SelectedDevice))
+            {
+                // Stop dynamic updates
+                _vm.StopDynamicUpdates();
+
+                // Clear the display
+                DeviceJsonTextBox.Text = string.Empty;
+            }
+        }
 
         private void ManageResources_Click(object sender, RoutedEventArgs e)
         {
@@ -60,67 +84,94 @@ namespace DeviceTesterUI.Views
         }
 
 
-        private void GetStaticInfo_Click(object sender, RoutedEventArgs e)
+        private async void GetStaticInfo_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedDevice == null)
+            if (_vm.SelectedDevice == null)
             {
                 DeviceJsonTextBox.Text = "No device selected.";
                 return;
             }
+
             try
             {
-                string exeDir = AppDomain.CurrentDomain.BaseDirectory;
-                string filePath = System.IO.Path.Combine(exeDir, "DummyData", "dummyStaticData.json");
-                if (!File.Exists(filePath))
+                // Stop any running dynamic updates
+                _vm.StopDynamicUpdates();
+
+                // Fetch static data from ViewModel
+                await _vm.GetStaticDataAsync();
+
+                // Display nicely formatted JSON
+                if (string.IsNullOrWhiteSpace(_vm.DeviceJson))
                 {
-                    DeviceJsonTextBox.Text = "File not found: " + filePath;
-                    return;
+                    DeviceJsonTextBox.Text = "Static data is empty.";
                 }
-
-                string jsonContent = File.ReadAllText(filePath);
-
-                // Pretty-print JSON
-                var parsedJson = JsonConvert.DeserializeObject(jsonContent);
-                string prettyJson = JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
-
-                DeviceJsonTextBox.Text = prettyJson;
+                else
+                {
+                    try
+                    {
+                        var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(_vm.DeviceJson);
+                        DeviceJsonTextBox.Text = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+                    }
+                    catch (Exception jsonEx)
+                    {
+                        DeviceJsonTextBox.Text = $"Error parsing JSON: {jsonEx.Message}";
+                    }
+                }
             }
             catch (Exception ex)
             {
-                DeviceJsonTextBox.Text = "Error reading JSON: " + ex.Message;
+                DeviceJsonTextBox.Text = $"Error fetching static data: {ex.Message}";
             }
         }
 
         private void GetDynamicInfo_Click(object sender, RoutedEventArgs e)
         {
-            if (ViewModel.SelectedDevice == null)
+            if (_vm.SelectedDevice == null)
             {
                 DeviceJsonTextBox.Text = "No device selected.";
                 return;
             }
+
             try
             {
-                string exeDir = AppDomain.CurrentDomain.BaseDirectory;
-                string filePath = System.IO.Path.Combine(exeDir, "DummyData", "dummyDynamicData.json");
-                if (!File.Exists(filePath))
+                // Stop previous dynamic updates safely
+                _vm.StopDynamicUpdates();
+
+                // Start new dynamic updates
+                _vm.StartDynamicUpdates(content =>
                 {
-                    DeviceJsonTextBox.Text = "File not found: " + filePath;
-                    return;
-                }
+                    try
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            if (string.IsNullOrWhiteSpace(content))
+                            {
+                                DeviceJsonTextBox.Text = "Dynamic data is empty.";
+                                return;
+                            }
 
-                string jsonContent = File.ReadAllText(filePath);
-
-                // Pretty-print JSON
-                var parsedJson = JsonConvert.DeserializeObject(jsonContent);
-                string prettyJson = JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
-
-                DeviceJsonTextBox.Text = prettyJson;
+                            try
+                            {
+                                var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(content);
+                                DeviceJsonTextBox.Text = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+                            }
+                            catch (Exception jsonEx)
+                            {
+                                DeviceJsonTextBox.Text = $"Error parsing dynamic JSON: {jsonEx.Message}";
+                            }
+                        });
+                    }
+                    catch (Exception dispatchEx)
+                    {
+                        // Optional: log dispatch exceptions
+                        DeviceJsonTextBox.Text = $"Error updating UI: {dispatchEx.Message}";
+                    }
+                });
             }
             catch (Exception ex)
             {
-                DeviceJsonTextBox.Text = "Error reading JSON: " + ex.Message;
+                DeviceJsonTextBox.Text = $"Error starting dynamic updates: {ex.Message}";
             }
         }
-
     }
 }
