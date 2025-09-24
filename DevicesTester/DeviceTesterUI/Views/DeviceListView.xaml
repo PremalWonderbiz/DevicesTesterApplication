@@ -9,7 +9,7 @@
     <Grid>
         <DataGrid x:Name="DeviceDataGrid"
           ItemsSource="{Binding Devices}"
-          SelectedItem="{Binding SelectedDevice, Mode=OneWayToSource}"
+          SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
           AutoGenerateColumns="False"
           HeadersVisibility="Column"
           CanUserAddRows="False"

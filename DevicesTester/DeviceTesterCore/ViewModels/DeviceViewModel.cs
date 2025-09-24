@@ -31,6 +31,17 @@ namespace DeviceTesterCore.Models
             }
         }
 
+        private string _errorMessage;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set
+            {
+                _errorMessage = value;
+                OnPropertyChanged(nameof(ErrorMessage)); 
+            }
+        }
+
         private Device _selectedDevice;
         public Device SelectedDevice
         {
@@ -46,6 +57,7 @@ namespace DeviceTesterCore.Models
                 {
                     EditingDevice = new Device(_selectedDevice);
                     DeviceJson = string.Empty;
+                    ErrorMessage = string.Empty;
                 }
                 else
                 {

@@ -26,15 +26,6 @@ namespace DeviceTesterUI.Views
             {
                 var deviceToSave = vm.EditingDevice;
 
-                // Assign IDs if missing
-                if (string.IsNullOrEmpty(deviceToSave.DeviceId))
-                    deviceToSave.DeviceId = Guid.NewGuid().ToString();
-                if (string.IsNullOrEmpty(deviceToSave.SolutionId))
-                    deviceToSave.SolutionId = Guid.NewGuid().ToString();
-
-                // Ensure correct port assignment
-                deviceToSave.Port = vm.EditingDevice.Port;
-
                 // 🔹 Duplicate IP + Port check (ignore the same DeviceId)
                 bool duplicateIpPort = vm.Devices.Any(d =>
                     d.IpAddress == deviceToSave.IpAddress &&
@@ -43,19 +34,19 @@ namespace DeviceTesterUI.Views
 
                 if (duplicateIpPort)
                 {
-                    MessageBox.Show(
-                        $"A device with same IP and Port already exists.",
-                        "Duplicate Device",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                        vm.SelectedDevice = null;
-                        vm.EditingDevice = vm.CreateDefaultDevice();
-                        vm.EditingDevice.Agent = vm.AvailableAgents.First();
-                        vm.EditingDevice.Port = vm.AvailablePorts.FirstOrDefault();
+                    vm.ErrorMessage = "A device with the same IP and Port already exists!";
                     return;
                 }
 
-                // Update or Add
+                vm.ErrorMessage = string.Empty;
+
+                if (string.IsNullOrEmpty(deviceToSave.DeviceId))
+                    deviceToSave.DeviceId = Guid.NewGuid().ToString();
+                if (string.IsNullOrEmpty(deviceToSave.SolutionId))
+                    deviceToSave.SolutionId = Guid.NewGuid().ToString();
+
+                deviceToSave.Port = vm.EditingDevice.Port;
+
                 if (vm.Devices.Any(d => d.DeviceId == deviceToSave.DeviceId))
                 {
                     await vm.UpdateDeviceAsync(new Device(deviceToSave));
@@ -102,6 +93,7 @@ namespace DeviceTesterUI.Views
         {
             if (DataContext is DeviceViewModel vm)
             {
+                vm.ErrorMessage = string.Empty;
                 vm.SelectedDevice = null;                  // <-- reset selection
                 vm.EditingDevice = vm.CreateDefaultDevice();
                 vm.EditingDevice.Agent = vm.AvailableAgents.First();

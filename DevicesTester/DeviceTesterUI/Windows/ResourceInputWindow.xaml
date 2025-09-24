@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
 
         <!-- Static Data -->
-        <TextBlock Grid.Row="0" Text="Enter Static Data:" Margin="0,0,0,5"/>
+        <TextBlock Grid.Row="0" Text="Static resources :" Margin="0,0,0,5"/>
         <TextBox x:Name="StaticDataTextBox"
                  Grid.Row="1"
                  AcceptsReturn="True"
@@ -23,7 +23,7 @@
                  VerticalScrollBarVisibility="Auto"/>
 
         <!-- Dynamic Data -->
-        <TextBlock Grid.Row="2" Text="Enter Dynamic Data:" Margin="0,10,0,5"/>
+        <TextBlock Grid.Row="2" Text="Dynamic resources :" Margin="0,10,0,5"/>
         <TextBox x:Name="DynamicDataTextBox"
                  Grid.Row="3"
                  AcceptsReturn="True"
