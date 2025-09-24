@@ -53,10 +53,8 @@ namespace DeviceTesterUI.Views
         {
             if (e.PropertyName == nameof(DeviceViewModel.SelectedDevice))
             {
-                // Stop dynamic updates
                 _vm.StopDynamicUpdates();
 
-                // Clear the display
                 DeviceJsonTextBox.Text = string.Empty;
             }
         }
@@ -67,7 +65,6 @@ namespace DeviceTesterUI.Views
             {
                 Owner = Window.GetWindow(this),
 
-                // Pass previous data to popup
                 StaticData = _staticResourceInput,   
                 DynamicData = _dynamicResourceInput  
             };
@@ -94,13 +91,10 @@ namespace DeviceTesterUI.Views
 
             try
             {
-                // Stop any running dynamic updates
                 _vm.StopDynamicUpdates();
 
-                // Fetch static data from ViewModel
                 await _vm.GetStaticDataAsync();
 
-                // Display nicely formatted JSON
                 if (string.IsNullOrWhiteSpace(_vm.DeviceJson))
                 {
                     DeviceJsonTextBox.Text = "Static data is empty.";
@@ -134,10 +128,8 @@ namespace DeviceTesterUI.Views
 
             try
             {
-                // Stop previous dynamic updates safely
                 _vm.StopDynamicUpdates();
 
-                // Start new dynamic updates
                 _vm.StartDynamicUpdates(content =>
                 {
                     try
@@ -163,7 +155,6 @@ namespace DeviceTesterUI.Views
                     }
                     catch (Exception dispatchEx)
                     {
-                        // Optional: log dispatch exceptions
                         DeviceJsonTextBox.Text = $"Error updating UI: {dispatchEx.Message}";
                     }
                 });

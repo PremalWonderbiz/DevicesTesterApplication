@@ -16,9 +16,8 @@ namespace DeviceTesterCore.Models
         private bool _isAuthenticated;
         private bool _useSecureConnection;
 
-        public Device() { }  // default constructor (needed for XAML binding etc.)
+        public Device() { } 
 
-        // Copy constructor
         public Device(Device other)
         {
             if (other == null) return;
