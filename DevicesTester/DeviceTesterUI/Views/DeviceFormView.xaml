@@ -134,7 +134,7 @@
                      VerticalContentAlignment="Center"/>
         </StackPanel>
 
-        <!-- Row 6: Save Button -->
+        <!-- Row 6: Error Message -->
         <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
            Text="{Binding ErrorMessage}" 
            Foreground="Red" 
@@ -146,12 +146,12 @@
         <!-- Row 7: Save Button -->
         <StackPanel Grid.Row="6" Grid.Column="0" Orientation="Horizontal" Margin="0,45,10,0" >
             <Button Content="Save" Margin="0,0,10,0"
-            Click="SaveDevice_Click"
+            
             Height="30" Width="100"
-            IsEnabled="{Binding HasErrors, Converter={StaticResource InverseBooleanConverter}}"/>
+            Command="{Binding SaveCommand}"/>
     
             <Button Content="Clear" 
-            Click="ClearDevice_Click"
+           Command="{Binding ClearCommand}"
             Height="30" Width="100"/>
         </StackPanel>
     </Grid>

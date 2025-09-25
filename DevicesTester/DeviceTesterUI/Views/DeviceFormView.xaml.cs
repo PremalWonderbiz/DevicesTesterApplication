@@ -20,52 +20,52 @@ namespace DeviceTesterUI.Views
         /// <summary>
         /// Handles Save button click → validates input, creates/updates device, and persists asynchronously.
         /// </summary>
-        private async void SaveDevice_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is DeviceViewModel vm && !vm.HasErrors)
-            {
-                var deviceToSave = vm.EditingDevice;
+        //private async void SaveDevice_Click(object sender, RoutedEventArgs e)
+        //{
+        //    if (DataContext is DeviceViewModel vm && !vm.HasErrors)
+        //    {
+        //        var deviceToSave = vm.EditingDevice;
 
-                // 🔹 Duplicate IP + Port check (ignore the same DeviceId)
-                bool duplicateIpPort = vm.Devices.Any(d =>
-                    d.IpAddress == deviceToSave.IpAddress &&
-                    d.Port == deviceToSave.Port &&
-                    d.DeviceId != deviceToSave.DeviceId);
+        //        // 🔹 Duplicate IP + Port check (ignore the same DeviceId)
+        //        bool duplicateIpPort = vm.Devices.Any(d =>
+        //            d.IpAddress == deviceToSave.IpAddress &&
+        //            d.Port == deviceToSave.Port &&
+        //            d.DeviceId != deviceToSave.DeviceId);
 
-                if (duplicateIpPort)
-                {
-                    vm.ErrorMessage = "A device with the same IP and Port already exists!";
-                    return;
-                }
+        //        if (duplicateIpPort)
+        //        {
+        //            vm.ErrorMessage = "A device with the same IP and Port already exists!";
+        //            return;
+        //        }
 
-                vm.ErrorMessage = string.Empty;
+        //        vm.ErrorMessage = string.Empty;
 
-                if (string.IsNullOrEmpty(deviceToSave.DeviceId))
-                    deviceToSave.DeviceId = Guid.NewGuid().ToString();
-                if (string.IsNullOrEmpty(deviceToSave.SolutionId))
-                    deviceToSave.SolutionId = Guid.NewGuid().ToString();
+        //        if (string.IsNullOrEmpty(deviceToSave.DeviceId))
+        //            deviceToSave.DeviceId = Guid.NewGuid().ToString();
+        //        if (string.IsNullOrEmpty(deviceToSave.SolutionId))
+        //            deviceToSave.SolutionId = Guid.NewGuid().ToString();
 
-                deviceToSave.Port = vm.EditingDevice.Port;
+        //        deviceToSave.Port = vm.EditingDevice.Port;
 
-                if (vm.Devices.Any(d => d.DeviceId == deviceToSave.DeviceId))
-                {
-                    await vm.UpdateDeviceAsync(new Device(deviceToSave));
-                    MessageBox.Show("Device updated successfully!");
-                }
-                else
-                {
-                    deviceToSave.IsAuthenticated = false;
-                    await vm.AddDeviceAsync(new Device(deviceToSave));
-                    MessageBox.Show("Device saved successfully!");
-                }
+        //        if (vm.Devices.Any(d => d.DeviceId == deviceToSave.DeviceId))
+        //        {
+        //            await vm.UpdateDeviceAsync(new Device(deviceToSave));
+        //            MessageBox.Show("Device updated successfully!");
+        //        }
+        //        else
+        //        {
+        //            deviceToSave.IsAuthenticated = false;
+        //            await vm.AddDeviceAsync(new Device(deviceToSave));
+        //            MessageBox.Show("Device saved successfully!");
+        //        }
 
-                // Reset form and selection
-                vm.SelectedDevice = null;
-                vm.EditingDevice = vm.CreateDefaultDevice();
-                vm.EditingDevice.Agent = vm.AvailableAgents.First();
-                vm.EditingDevice.Port = vm.AvailablePorts.FirstOrDefault();
-            }
-        }
+        //        // Reset form and selection
+        //        vm.SelectedDevice = null;
+        //        vm.EditingDevice = vm.CreateDefaultDevice();
+        //        vm.EditingDevice.Agent = vm.AvailableAgents.First();
+        //        vm.EditingDevice.Port = vm.AvailablePorts.FirstOrDefault();
+        //    }
+        //}
 
 
         /// <summary>

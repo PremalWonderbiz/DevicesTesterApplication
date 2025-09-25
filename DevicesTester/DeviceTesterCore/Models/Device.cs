@@ -1,26 +1,44 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
+using DeviceTesterCore.CustomAttributes;
 
 namespace DeviceTesterCore.Models
 {
-    public class Device : INotifyPropertyChanged, IDataErrorInfo
+    public class Device : INotifyPropertyChanged, INotifyDataErrorInfo
     {
-        private string _agent;
-        private string _deviceId;
-        private string _solutionId;
-        private string _ipAddress;
-        private string _port;
-        private string _username;
-        private string _password;
-        private bool _isAuthenticated;
-        private bool _useSecureConnection;
+        #pragma warning disable IDE0028
+        private readonly Dictionary<string, List<string>> _errors = new() { };
+        #pragma warning restore IDE0028
 
-        public Device() { } 
+        private readonly bool _suppressValidation = true;
+
+        public Device()
+        {
+            _suppressValidation = true;
+
+            Agent = "";
+            DeviceId = Guid.Empty.ToString();
+            SolutionId = Guid.Empty.ToString();
+            IpAddress = "127.0.0.1";
+            Port = "8080";
+            Username = "";
+            Password = "";
+            IsAuthenticated = false;
+            UseSecureConnection = true;
+
+            _suppressValidation = false;
+        }
 
         public Device(Device other)
         {
-            if (other == null) return;
+            ArgumentNullException.ThrowIfNull(other);
+
+            _suppressValidation = true;
 
             Agent = other.Agent;
             DeviceId = other.DeviceId;
@@ -31,114 +49,173 @@ namespace DeviceTesterCore.Models
             Password = other.Password;
             IsAuthenticated = other.IsAuthenticated;
             UseSecureConnection = other.UseSecureConnection;
+
+            _suppressValidation = false;  
         }
 
+        // ==== Properties with Validation Attributes ====
+        private string _agent;
+        [Required(ErrorMessage = "Agent is required")]
         public string Agent
         {
             get => _agent;
-            set { _agent = value; OnPropertyChanged(nameof(Agent)); }
+            set
+            {
+                if (_agent != value)
+                {
+                    _agent = value;
+                    OnPropertyChanged(nameof(Agent));
+                    ValidateProperty(nameof(Agent), value);
+                }
+            }
         }
 
+        private string _deviceId;
+        [RegularExpression(@"^$|^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$",
+            ErrorMessage = "DeviceId must be a valid GUID")]
         public string DeviceId
         {
             get => _deviceId;
-            set { _deviceId = value; OnPropertyChanged(nameof(DeviceId)); }
+            set
+            {
+                if (_deviceId != value)
+                {
+                    _deviceId = value;
+                    OnPropertyChanged(nameof(DeviceId));
+                    ValidateProperty(nameof(DeviceId), value);
+                }
+            }
         }
 
+        private string _solutionId;
+        [RegularExpression(@"^$|^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$",
+            ErrorMessage = "SolutionId must be a valid GUID")]
         public string SolutionId
         {
             get => _solutionId;
-            set { _solutionId = value; OnPropertyChanged(nameof(SolutionId)); }
+            set
+            {
+                if (_solutionId != value)
+                {
+                    _solutionId = value;
+                    OnPropertyChanged(nameof(SolutionId));
+                    ValidateProperty(nameof(SolutionId), value);
+                }
+            }
         }
 
+        private string _ipAddress;
+        [Required(ErrorMessage = "IP Address is required")]
+        [IPAddress(ErrorMessage = "Invalid IP address")]
         public string IpAddress
         {
             get => _ipAddress;
-            set { _ipAddress = value; OnPropertyChanged(nameof(IpAddress)); }
+            set
+            {
+                if (_ipAddress != value)
+                {
+                    _ipAddress = value;
+                    OnPropertyChanged(nameof(IpAddress));
+                    ValidateProperty(nameof(IpAddress), value);
+                }
+            }
         }
 
+        private string _port;
+        [Required(ErrorMessage = "Port is required")]
+        [Range(1, 65535, ErrorMessage = "Port must be between 1 and 65535")]
         public string Port
         {
             get => _port;
-            set { _port = value; OnPropertyChanged(nameof(Port)); }
+            set
+            {
+                if (_port != value)
+                {
+                    _port = value;
+                    OnPropertyChanged(nameof(Port));
+                    ValidateProperty(nameof(Port), value);
+                }
+            }
         }
 
+        private string _username;
+        [Required(ErrorMessage = "Username is required")]
         public string Username
         {
             get => _username;
-            set { _username = value; OnPropertyChanged(nameof(Username)); }
+            set
+            {
+                if (_username != value)
+                {
+                    _username = value;
+                    OnPropertyChanged(nameof(Username));
+                    ValidateProperty(nameof(Username), value);
+                }
+            }
         }
 
+        private string _password;
+        [Required(ErrorMessage = "Password is required")]
         public string Password
         {
             get => _password;
-            set { _password = value; OnPropertyChanged(nameof(Password)); }
+            set
+            {
+                if (_password != value)
+                {
+                    _password = value;
+                    OnPropertyChanged(nameof(Password));
+                    ValidateProperty(nameof(Password), value);
+                }
+            }
         }
 
+        private bool _isAuthenticated;
         public bool IsAuthenticated
         {
             get => _isAuthenticated;
             set { _isAuthenticated = value; OnPropertyChanged(nameof(IsAuthenticated)); }
         }
 
+        private bool _useSecureConnection;
         public bool UseSecureConnection
         {
             get => _useSecureConnection;
             set { _useSecureConnection = value; OnPropertyChanged(nameof(UseSecureConnection)); }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        // ==== Validations ====
+        public bool HasErrors => _errors.Count > 0;
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
+
+        public IEnumerable GetErrors(string? propertyName)
+        {
+            if (!string.IsNullOrEmpty(propertyName) && _errors.TryGetValue(propertyName, out var list))
+                return list;
+            return Enumerable.Empty<string>();
+        }
+
+        private void ValidateProperty(string propertyName, object value)
+        {
+            if (_suppressValidation) return; 
+            var results = new List<ValidationResult>();
+
+            Validator.TryValidateProperty(
+                value,
+                new ValidationContext(this) { MemberName = propertyName },
+                results);
+
+            if (results.Any())
+                _errors[propertyName] = results.Select(r => r.ErrorMessage!).ToList();
+            else
+                _errors.Remove(propertyName);
+
+            ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
+        }
+
+        // ==== PropertyChanged plumbing ====
+        public event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        //Validation (IDataErrorInfo)
-        public string Error => null;
-
-        public string this[string columnName]
-        {
-            get
-            {
-                switch (columnName)
-                {
-                    case nameof(Agent):
-                        if (string.IsNullOrWhiteSpace(Agent))
-                            return "Agent is required";
-                        break;
-
-                    case nameof(IpAddress):
-                        if (string.IsNullOrWhiteSpace(IpAddress) || !IPAddress.TryParse(IpAddress, out _))
-                            return "Invalid IP address";
-                        break;
-
-                    case nameof(Port):
-                        if (!int.TryParse(Port, out int port) || port <= 0 || port > 65535)
-                            return "Port must be between 1 and 65535";
-                        break;
-
-                    case nameof(Username):
-                        if (string.IsNullOrWhiteSpace(Username))
-                            return "Username is required";
-                        break;
-
-                    case nameof(Password):
-                        if (string.IsNullOrWhiteSpace(Password))
-                            return "Password is required";
-                        break;
-
-                    case nameof(DeviceId):
-                        if (!string.IsNullOrEmpty(DeviceId) && !Guid.TryParse(DeviceId, out _))
-                            return "DeviceId must be a valid GUID";
-                        break;
-
-                    case nameof(SolutionId):
-                        if (!string.IsNullOrEmpty(SolutionId) && !Guid.TryParse(SolutionId, out _))
-                            return "SolutionId must be a valid GUID";
-                        break;
-                }
-                return null;
-            }
-        }
-        public bool HasErrors => GetType().GetProperties()
-       .Any(p => !string.IsNullOrEmpty(this[p.Name]));
     }
 }

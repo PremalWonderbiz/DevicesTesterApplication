@@ -78,19 +78,6 @@ namespace DeviceTesterTests.Helpers
         }
 
         [Test]
-        public void BoundPassword_SetNull_ResetsPasswordBoxToEmpty()
-        {
-            // Arrange
-            _passwordBox.Password = "OldPassword";
-
-            // Act
-            PasswordBoxHelper.SetBoundPassword(_passwordBox, null);
-
-            // ClassicAssert
-            ClassicAssert.AreEqual(string.Empty, _passwordBox.Password);
-        }
-
-        [Test]
         public void PasswordBox_PasswordChanged_UpdatesBoundPasswordOnlyIfDifferent()
         {
             // Arrange

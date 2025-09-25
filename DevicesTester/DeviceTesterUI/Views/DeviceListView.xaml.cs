@@ -38,11 +38,11 @@ namespace DeviceTesterUI.Views
             {
                 if (DataContext is DeviceViewModel viewModel)
                 {
-                    bool result = await viewModel.AuthenticateDeviceAsync(device);
-                    if (result)
-                        MessageBox.Show($"Authentication succeeded");
-                    else
-                        MessageBox.Show($"Authentication failed");
+                    //bool result = await viewModel.AuthenticateDeviceAsync(device);
+                    //if (result)
+                    //    MessageBox.Show($"Authentication succeeded");
+                    //else
+                    //    MessageBox.Show($"Authentication failed");
                 }
             }
         }
@@ -61,7 +61,7 @@ namespace DeviceTesterUI.Views
                     MessageBoxImage.Question);
                     if (result == MessageBoxResult.Yes)
                     {
-                        await viewModel.DeleteDeviceAsync(device);
+                        //await viewModel.DeleteDeviceAsync(device);
                         MessageBox.Show($"Device deleted successfully");
                     }
                 }
