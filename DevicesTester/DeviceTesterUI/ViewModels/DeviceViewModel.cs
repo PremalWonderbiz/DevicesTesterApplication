@@ -274,18 +274,8 @@ namespace DeviceTesterCore.Models
 
         public Device CreateDefaultDevice()
         {
-            return new Device
-            {
-                Agent = "Redfish",
-                DeviceId = string.Empty,
-                SolutionId = string.Empty,
-                IpAddress = "",
-                Port = "9000",
-                Username = "",
-                Password = "",
-                UseSecureConnection = true,
-                IsAuthenticated = false
-            };
+            return new Device();
+        }
             
 
         public async Task LoadDevicesAsync()

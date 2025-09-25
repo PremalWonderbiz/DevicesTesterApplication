@@ -21,15 +21,15 @@ namespace DeviceTesterCore.Models
         {
             _suppressValidation = true;
 
-            Agent = "";
-            DeviceId = Guid.Empty.ToString();
-            SolutionId = Guid.Empty.ToString();
-            IpAddress = "127.0.0.1";
-            Port = "8080";
+            Agent = "Redfish";
+            DeviceId = string.Empty;
+            SolutionId = string.Empty;
+            IpAddress = "127.0.0.0";
+            Port = "9000";
             Username = "";
             Password = "";
-            IsAuthenticated = false;
             UseSecureConnection = true;
+            IsAuthenticated = false;
 
             _suppressValidation = false;
         }
