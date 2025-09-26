@@ -31,16 +31,5 @@
     "Password": "Admin@123",
     "IsAuthenticated": true,
     "UseSecureConnection": true
-  },
-  {
-    "Agent": "Redfish",
-    "DeviceId": "b2552ae2-ea7b-4186-872d-d32622c29c19",
-    "SolutionId": "c4cda6d2-973c-4079-b2c1-1c3f45d941f9",
-    "IpAddress": "127.0.0.1",
-    "Port": "9000",
-    "Username": "account",
-    "Password": "Pass@123",
-    "IsAuthenticated": true,
-    "UseSecureConnection": true
   }
 ]

@@ -84,6 +84,7 @@ namespace DeviceTesterCore.Models
                 EditingDevice = CreateDefaultDevice();
 
             DeviceJson = string.Empty;
+            ErrorMessage = string.Empty;
         }
 
         public ObservableCollection<string> AvailableAgents { get; } = new()
