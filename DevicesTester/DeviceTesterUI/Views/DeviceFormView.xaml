@@ -5,7 +5,6 @@
              xmlns:conv="clr-namespace:DeviceTesterUI.Converters"
              Background="White">
     <UserControl.Resources>
-        <conv:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
 
         <!-- Error Template: input with red border and error text below -->
         <ControlTemplate x:Key="ValidationErrorTemplate">

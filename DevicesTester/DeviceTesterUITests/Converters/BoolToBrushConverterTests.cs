@@ -59,6 +59,16 @@ namespace DeviceTesterUITests.Converters
             // ClassicAssert
             ClassicAssert.AreEqual(Brushes.Gray, result);
         }
+        
+        [Test]
+        public void Convert_Null_ReturnsGrayBrush()
+        {
+            // Act
+            var result = _converter.Convert(null, typeof(Brush), null, null);
+
+            // ClassicAssert
+            ClassicAssert.AreEqual(Brushes.Gray, result);
+        }
 
         [Test]
         public void ConvertBack_ThrowsNotImplementedException()
