@@ -120,6 +120,7 @@ namespace DeviceTesterUI.Views
 
         private void GetDynamicInfo_Click(object sender, RoutedEventArgs e)
         {
+            var firstTime = true;
             if (_vm.SelectedDevice == null)
             {
                 DeviceJsonTextBox.Text = "No device selected.";
@@ -134,7 +135,7 @@ namespace DeviceTesterUI.Views
                 {
                     try
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.Invoke(async () =>
                         {
                             if (string.IsNullOrWhiteSpace(content))
                             {
@@ -144,8 +145,14 @@ namespace DeviceTesterUI.Views
 
                             try
                             {
+                                if (firstTime)
+                                {
+                                    _vm.DeviceJson = null;
+                                    firstTime = false;
+                                    await Task.Delay(2000); // loading spinner
+                                }
                                 var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(content);
-                                DeviceJsonTextBox.Text = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+                                _vm.DeviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
                             }
                             catch (Exception jsonEx)
                             {

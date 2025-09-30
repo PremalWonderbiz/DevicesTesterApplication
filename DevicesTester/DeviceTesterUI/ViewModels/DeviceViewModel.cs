@@ -317,7 +317,8 @@ namespace DeviceTesterCore.Models
             StopDynamicUpdates();
             if (SelectedDevice != null)
             {
-                //await Task.Delay(2000);
+                DeviceJson = null; //loading spinner
+                await Task.Delay(1000);
                 DeviceJson = await _dataProvider.GetStaticAsync(SelectedDevice);
             }
                 
