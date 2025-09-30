@@ -79,9 +79,12 @@ namespace DeviceTesterTests.ServicesTests
         [Test]
         public void GetStaticAsync_ShouldThrow_WhenFileMissing()
         {
-            var missingProvider = new JsonDeviceDataProvider(_dynamicFiles);
+            var tempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json");
+
+            var provider = new JsonDeviceDataProvider(_dynamicFiles, tempFile);
+
             ClassicAssert.ThrowsAsync<InvalidOperationException>(() =>
-                missingProvider.GetStaticAsync(new Device()));
+                provider.GetStaticAsync(new Device()));
         }
 
         #endregion

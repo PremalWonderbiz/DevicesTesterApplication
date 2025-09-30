@@ -9,11 +9,12 @@ namespace DeviceTesterServices.Services
     public class JsonDeviceDataProvider : IDeviceDataProvider
     {
         private readonly string[] _dynamicFiles;
+        private readonly string _staticFilePath;
         private readonly System.Timers.Timer _timer;
         private int _fileIndex = 0;
         private Action<string>? _onDataReceived;
 
-        public JsonDeviceDataProvider(string[] dynamicFiles, double intervalMs = 5000)
+        public JsonDeviceDataProvider(string[] dynamicFiles, string? staticFilePath = null, double intervalMs = 5000)
         {
             if (dynamicFiles == null || dynamicFiles.Length == 0)
                 throw new ArgumentException("dynamicFiles cannot be null or empty.");
@@ -22,18 +23,17 @@ namespace DeviceTesterServices.Services
             _timer = new System.Timers.Timer(intervalMs);
             _timer.Elapsed += TimerElapsed;
             _timer.AutoReset = true;
+            _staticFilePath = staticFilePath ?? Path.Combine("DummyData", "StaticData.json");
         }
 
         public async Task<string> GetStaticAsync(Device device)
         {
             try
             {
-                var filePath = Path.Combine("DummyData", "StaticData.json");
+                if (!File.Exists(_staticFilePath))
+                    throw new FileNotFoundException("Static data file not found.", _staticFilePath);
 
-                if (!File.Exists(filePath))
-                    throw new FileNotFoundException("Static data file not found.", filePath);
-
-                return await File.ReadAllTextAsync(filePath);
+                return await File.ReadAllTextAsync(_staticFilePath);
             }
             catch (Exception ex)
             {

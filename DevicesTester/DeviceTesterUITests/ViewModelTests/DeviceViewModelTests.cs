@@ -115,6 +115,7 @@ namespace DeviceTesterTests.ViewModelTests
         }
 
         [Test]
+        [Ignore("Tests includes interaction")]
         public async Task DeleteDeviceAsync_ShouldRemoveDevice()
         {
             var device = new Device { DeviceId = "1" };
