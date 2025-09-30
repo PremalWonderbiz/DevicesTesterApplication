@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="DeviceTesterUI.Animations.LoadingSpinner"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="{Binding SpinnerSize, RelativeSource={RelativeSource Self}}"
+             Height="{Binding SpinnerSize, RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <!-- Optional Background Ring -->
+        <Ellipse Width="{Binding SpinnerSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 Height="{Binding SpinnerSize, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 Stroke="{Binding BackgroundBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 StrokeThickness="{Binding StrokeThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+
+        <!-- Rotating Arc (Donut Segment) -->
+        <Path Stroke="{Binding ArcBrush, RelativeSource={RelativeSource AncestorType=UserControl}}"
+              StrokeThickness="{Binding StrokeThickness, RelativeSource={RelativeSource AncestorType=UserControl}}"
+              StrokeStartLineCap="Round"
+              StrokeEndLineCap="Round"
+              RenderTransformOrigin="0.5,0.5">
+            <Path.Data>
+                <PathGeometry>
+                    <PathFigure StartPoint="{Binding ArcStartPoint}">
+                        <ArcSegment Point="{Binding ArcEndPoint}"
+                                    Size="{Binding ArcSize}"
+                                    IsLargeArc="{Binding IsLargeArc}"
+                                    SweepDirection="Clockwise"/>
+                    </PathFigure>
+                </PathGeometry>
+            </Path.Data>
+            <Path.RenderTransform>
+                <RotateTransform x:Name="arcRotate"/>
+            </Path.RenderTransform>
+            <Path.Triggers>
+                <EventTrigger RoutedEvent="Loaded">
+                    <BeginStoryboard>
+                        <Storyboard RepeatBehavior="Forever">
+                            <DoubleAnimation Storyboard.TargetName="arcRotate"
+                                             Storyboard.TargetProperty="Angle"
+                                             From="0" To="360"
+                                             Duration="{Binding RotationDuration, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </Path.Triggers>
+        </Path>
+    </Grid>
+</UserControl>

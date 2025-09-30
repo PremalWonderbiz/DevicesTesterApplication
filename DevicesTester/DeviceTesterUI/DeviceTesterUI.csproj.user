@@ -4,6 +4,9 @@
     <_LastSelectedProfileId>C:\Users\Premal Kadam\Documents\Device Tester\DevicesTester\DeviceTesterUI\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Update="Animations\LoadingSpinner.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\DeviceDetailsView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>

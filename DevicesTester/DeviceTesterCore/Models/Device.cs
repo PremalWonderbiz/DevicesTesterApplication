@@ -170,8 +170,8 @@ namespace DeviceTesterCore.Models
             }
         }
 
-        private bool _isAuthenticated;
-        public bool IsAuthenticated
+        private bool? _isAuthenticated;
+        public bool? IsAuthenticated
         {
             get => _isAuthenticated;
             set { _isAuthenticated = value; OnPropertyChanged(nameof(IsAuthenticated)); }

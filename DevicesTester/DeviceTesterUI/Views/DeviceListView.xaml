@@ -1,6 +1,7 @@
 ﻿<UserControl x:Class="DeviceTesterUI.Views.DeviceListView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DeviceTesterUI.Animations"
              xmlns:conv="clr-namespace:DeviceTesterUI.Converters"
              Background="White">
     <UserControl.Resources>
@@ -84,12 +85,33 @@
                 <DataGridTemplateColumn Header="Authenticated" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Ellipse Width="12" Height="12" VerticalAlignment="Center"
-                     Fill="{Binding IsAuthenticated, Converter={StaticResource BoolToBrushConverter}}"/>
+                            <Grid>
+                                <Ellipse x:Name="AuthEllipse"
+                         Width="12"
+                         Height="12"
+                         VerticalAlignment="Center"
+                         Fill="{Binding IsAuthenticated, Converter={StaticResource BoolToBrushConverter}}"
+                         Visibility="Visible"/>
+
+                                <local:LoadingSpinner x:Name="AuthSpinner"
+                                      SpinnerSize="14"
+                                      StrokeThickness="2"
+                                      ArcBrush="#424242"
+                                      BackgroundBrush="#33000000"
+                                      ArcLength="20"
+                                      RotationDuration="0:0:1"
+                                      Visibility="Collapsed"/>
+                            </Grid>
+
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsAuthenticated}" Value="{x:Null}">
+                                    <Setter TargetName="AuthSpinner" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="AuthEllipse" Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

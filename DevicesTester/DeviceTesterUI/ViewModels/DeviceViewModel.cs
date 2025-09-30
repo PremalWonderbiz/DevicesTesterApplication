@@ -126,7 +126,7 @@ namespace DeviceTesterCore.Models
             DeleteCommand = new ActionCommand(async param => await DeleteDeviceAsync(param as Device),
                                       param => param is Device);
 
-            _ = LoadDevicesAsync();
+            _ = LoadDevicesAsync(true);
             EditingDevice = CreateDefaultDevice();
         }
 
@@ -279,12 +279,36 @@ namespace DeviceTesterCore.Models
         }
             
 
-        public async Task LoadDevicesAsync()
+        public async Task LoadDevicesAsync(bool initial = false)
         {
             Devices.Clear();
             var devicesFromFile = await _repo.LoadDevicesAsync();
             foreach (var device in devicesFromFile)
+            {
+                if (initial)
+                    device.IsAuthenticated = null;
                 Devices.Add(device);
+            }
+
+            if (initial)
+            {
+                await Task.Delay(2000);
+                AuthenticateAllDevices();
+                await _repo.SaveDevicesAsync(Devices);
+                OnPropertyChanged(nameof(Devices));
+            }
+        }
+
+        private void AuthenticateAllDevices()
+        {
+            if(Devices is not null && Devices.Count > 0)
+            {
+                foreach (var device in Devices)
+                {
+                    bool result = new Random().Next(0, 2) == 1;
+                    device.IsAuthenticated = result;
+                }
+            }
         }
 
         // ================= Dynamic Data =================
@@ -292,7 +316,11 @@ namespace DeviceTesterCore.Models
         {
             StopDynamicUpdates();
             if (SelectedDevice != null)
+            {
+                //await Task.Delay(2000);
                 DeviceJson = await _dataProvider.GetStaticAsync(SelectedDevice);
+            }
+                
         }
 
         public void StartDynamicUpdates(Action<string> onDataReceived)
