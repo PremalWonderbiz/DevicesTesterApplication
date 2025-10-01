@@ -242,6 +242,8 @@ namespace DeviceTesterCore.Models
         {
             if (device == null) return;
 
+            device.IsAuthenticated = null;
+            await Task.Delay(500);
             bool result = new Random().Next(0, 2) == 1;
             device.IsAuthenticated = result;
 

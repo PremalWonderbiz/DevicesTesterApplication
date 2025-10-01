@@ -91,6 +91,10 @@ namespace DeviceTesterUI.Views
 
             try
             {
+                DeviceGetStaticDataBtn.IsEnabled = false;
+                DeviceGetDynamicDataBtn.IsEnabled = false;
+                DeviceManageResourcesBtn.IsEnabled = false;
+                LoadingSpinner.Visibility = Visibility.Visible;
                 _vm.StopDynamicUpdates();
 
                 await _vm.GetStaticDataAsync();
@@ -116,6 +120,13 @@ namespace DeviceTesterUI.Views
             {
                 DeviceJsonTextBox.Text = $"Error fetching static data: {ex.Message}";
             }
+            finally
+            {
+                DeviceGetStaticDataBtn.IsEnabled = true;
+                DeviceGetDynamicDataBtn.IsEnabled = true;
+                DeviceManageResourcesBtn.IsEnabled = true;
+                LoadingSpinner.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void GetDynamicInfo_Click(object sender, RoutedEventArgs e)
@@ -131,11 +142,23 @@ namespace DeviceTesterUI.Views
             {
                 _vm.StopDynamicUpdates();
 
-                _vm.StartDynamicUpdates(content =>
+                _vm.StartDynamicUpdates(async content =>
                 {
                     try
                     {
-                        Dispatcher.Invoke(async () =>
+                        if (firstTime)
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                DeviceGetStaticDataBtn.IsEnabled = false;
+                                DeviceGetDynamicDataBtn.IsEnabled = false;
+                                DeviceManageResourcesBtn.IsEnabled = false;
+                                LoadingSpinner.Visibility = Visibility.Visible;
+                                _vm.DeviceJson = null;
+                            });
+                        }
+
+                        await Dispatcher.Invoke(async () =>
                         {
                             if (string.IsNullOrWhiteSpace(content))
                             {
@@ -147,12 +170,12 @@ namespace DeviceTesterUI.Views
                             {
                                 if (firstTime)
                                 {
-                                    _vm.DeviceJson = null;
-                                    firstTime = false;
-                                    await Task.Delay(2000); // loading spinner
+                                    await Task.Delay(2000); // simulate loader delay
+                                    firstTime = false; // now mark it done
                                 }
                                 var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(content);
-                                _vm.DeviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+                                _vm.DeviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(
+                                    parsedJson, Newtonsoft.Json.Formatting.Indented);
                             }
                             catch (Exception jsonEx)
                             {
@@ -163,6 +186,19 @@ namespace DeviceTesterUI.Views
                     catch (Exception dispatchEx)
                     {
                         DeviceJsonTextBox.Text = $"Error updating UI: {dispatchEx.Message}";
+                    }
+                    finally
+                    {
+                        if (!firstTime)
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                DeviceGetStaticDataBtn.IsEnabled = true;
+                                DeviceGetDynamicDataBtn.IsEnabled = true;
+                                DeviceManageResourcesBtn.IsEnabled = true;
+                                LoadingSpinner.Visibility = Visibility.Collapsed;
+                            });
+                        }
                     }
                 });
             }
