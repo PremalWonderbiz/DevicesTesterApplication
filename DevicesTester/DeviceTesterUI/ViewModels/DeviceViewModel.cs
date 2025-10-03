@@ -13,32 +13,70 @@ using Newtonsoft.Json;
 
 namespace DeviceTesterCore.Models
 {
-    public class DeviceViewModel : BaseViewModel
+    public class DeviceViewModel : INotifyPropertyChanged
     {
-        private readonly IDeviceRepository _repo;
-        private readonly IDeviceDataProvider _dataProvider;
+        // new sub-VM instance (field initializer ensures availability before ctor runs)
+        private readonly DeviceListViewModel _list = new DeviceListViewModel();
+        public DeviceListViewModel List => _list;
 
-        public ObservableCollection<Device> Devices { get; set; } = new();
 
-        private string _staticResourceInput;
-        
-        private string _dynamicResourceInput;
-
-        private Device _selectedDevice;
-        public Device SelectedDevice
+        // wrapper for Devices (keeps previous name/API so methods compile unchanged)
+        public ObservableCollection<Device> Devices
         {
-            get => _selectedDevice;
+            get => List.Devices;
             set
             {
-                if (_selectedDevice != value)
+                if (List.Devices != value)
                 {
-                    _selectedDevice = value;
+                    List.Devices = value;
+                    OnPropertyChanged(nameof(Devices));
+                }
+            }
+        }
+
+        // wrapper for SelectedDevice that preserves the original side-effects (no method bodies changed)
+        public Device SelectedDevice
+        {
+            get => List.SelectedDevice;
+            set
+            {
+                if (List.SelectedDevice != value)
+                {
+                    List.SelectedDevice = value;
+
+                    // preserve original behavior (calls already present in your file)
                     OnPropertyChanged(nameof(SelectedDevice));
                     OnSelectedDeviceChanged();
                     UpdateCommandStates();
                 }
             }
         }
+
+
+        private readonly IDeviceRepository _repo;
+        private readonly IDeviceDataProvider _dataProvider;
+
+        //public ObservableCollection<Device> Devices { get; set; } = new();
+
+        private string _staticResourceInput;
+        
+        private string _dynamicResourceInput;
+
+        //private Device _selectedDevice;
+        //public Device SelectedDevice
+        //{
+        //    get => _selectedDevice;
+        //    set
+        //    {
+        //        if (_selectedDevice != value)
+        //        {
+        //            _selectedDevice = value;
+        //            OnPropertyChanged(nameof(SelectedDevice));
+        //            OnSelectedDeviceChanged();
+        //            UpdateCommandStates();
+        //        }
+        //    }
+        //}
 
         private Device _editingDevice;
         public Device EditingDevice
@@ -488,6 +526,7 @@ namespace DeviceTesterCore.Models
                     bool result = new Random().Next(0, 2) == 1;
                     device.IsAuthenticated = result;
                 }
+                UpdateCommandStates();
             }
         }
 
@@ -521,6 +560,13 @@ namespace DeviceTesterCore.Models
             _dataProvider.StopDynamicUpdates(SelectedDevice);
             DeviceJson = string.Empty;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string propertyName) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        // Dictionary to hold multiple loading states
+        public Dictionary<string, LoadingState> LoadingStates { get; } = new();
 
     }
 }

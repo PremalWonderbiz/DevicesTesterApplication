@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DeviceTesterCore.Models;
 
 namespace DeviceTesterUI.ViewModels
 {
-    public abstract class BaseViewModel 
+    // Static/Dynamic JSON fetching
+    internal class DeviceDataViewModel
     {
-        
-       
     }
 }
