@@ -5,6 +5,8 @@
              xmlns:conv="clr-namespace:DeviceTesterUI.Converters"
              Background="White">
     <UserControl.Resources>
+        <conv:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
+        <conv:BooleanNegationConverter x:Key="BooleanNegationConverter"/>
 
         <!-- Error Template: input with red border and error text below -->
         <ControlTemplate x:Key="ValidationErrorTemplate">
@@ -35,7 +37,8 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Margin="10">
+    <Grid Margin="10" 
+          IsEnabled="{Binding IsDeviceDetailsBusy, Converter={StaticResource BooleanNegationConverter}}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2.8*" />
             <ColumnDefinition Width="2.8*" />

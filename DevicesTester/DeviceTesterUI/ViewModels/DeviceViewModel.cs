@@ -7,15 +7,22 @@ using System.Threading.Tasks;
 using System.Windows;
 using DeviceTesterCore.Interfaces;
 using DeviceTesterUI.Commands;
+using DeviceTesterUI.ViewModels;
+using DeviceTesterUI.Windows;
+using Newtonsoft.Json;
 
 namespace DeviceTesterCore.Models
 {
-    public class DeviceViewModel : INotifyPropertyChanged
+    public class DeviceViewModel : BaseViewModel
     {
         private readonly IDeviceRepository _repo;
         private readonly IDeviceDataProvider _dataProvider;
 
         public ObservableCollection<Device> Devices { get; set; } = new();
+
+        private string _staticResourceInput;
+        
+        private string _dynamicResourceInput;
 
         private Device _selectedDevice;
         public Device SelectedDevice
@@ -28,6 +35,7 @@ namespace DeviceTesterCore.Models
                     _selectedDevice = value;
                     OnPropertyChanged(nameof(SelectedDevice));
                     OnSelectedDeviceChanged();
+                    UpdateCommandStates();
                 }
             }
         }
@@ -113,6 +121,9 @@ namespace DeviceTesterCore.Models
         public ActionCommand ClearCommand { get; }
         public ActionCommand AuthenticateCommand { get; }
         public ActionCommand DeleteCommand { get; }
+        public ActionCommand GetStaticDataCommand { get; }
+        public ActionCommand GetDynamicDataCommand { get; }
+        public ActionCommand ManageResourcesCommand { get; }
 
         public DeviceViewModel(IDeviceRepository repo, IDeviceDataProvider dataProvider)
         {
@@ -121,13 +132,171 @@ namespace DeviceTesterCore.Models
 
             SaveCommand = new ActionCommand(async _ => await SaveDeviceAsync(), CanSave);
             ClearCommand = new ActionCommand(Clear);
-            AuthenticateCommand = new ActionCommand(async param => await AuthenticateDeviceAsync(param as Device),
-                                            param => param is Device);
+            AuthenticateCommand = new ActionCommand(
+                async param =>
+                {
+                    if (param is Device device)
+                    {
+                        await RunWithLoader("Authenticate", async () =>
+                        {
+                            await AuthenticateDeviceAsync(device);
+                        });
+                    }
+                },
+                param => param is Device && !IsDeviceDetailsBusy // optionally disable if busy
+            );
+
             DeleteCommand = new ActionCommand(async param => await DeleteDeviceAsync(param as Device),
                                       param => param is Device);
+            GetStaticDataCommand = new ActionCommand(
+            async _ => await RunWithLoader("StaticData", GetStaticDataAsync),
+            _ => CanExecuteCommand()
+            );
+
+            GetDynamicDataCommand = new ActionCommand(
+                async _ => await RunWithLoader("DynamicData", GetDynamicDataAsync),
+                _ => CanExecuteCommand()
+            );
+
+            ManageResourcesCommand = new ActionCommand(
+                _ => OpenResourceWindow(),
+                _ => CanExecuteCommand()
+            );
 
             _ = LoadDevicesAsync(true);
             EditingDevice = CreateDefaultDevice();
+        }
+
+        public bool IsFetchingStatic => LoadingStates.ContainsKey("StaticData") && LoadingStates["StaticData"].IsLoading;
+        public bool IsFetchingDynamic => LoadingStates.ContainsKey("DynamicData") && LoadingStates["DynamicData"].IsLoading;
+
+
+        /// <summary>
+        /// Global busy flag derived from LoadingStates
+        /// </summary>
+        public bool IsDeviceDetailsBusy => LoadingStates.Values.Any(x => x.IsLoading);
+        public bool IsDeviceDetailsOnlyBusy => IsFetchingDynamic || IsFetchingStatic;
+
+        private bool CanExecuteCommand()
+        {
+            return SelectedDevice?.IsAuthenticated == true && !IsDeviceDetailsBusy;
+        }
+
+        private void UpdateCommandStates()
+        {
+            GetStaticDataCommand.RaiseCanExecuteChanged();
+            GetDynamicDataCommand.RaiseCanExecuteChanged();
+            ManageResourcesCommand.RaiseCanExecuteChanged();
+        }
+
+        protected async Task RunWithLoader(string key, Func<Task> operation)
+        {
+            if (!LoadingStates.ContainsKey(key))
+                LoadingStates[key] = new LoadingState();
+
+            var state = LoadingStates[key];
+
+            state.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(LoadingState.IsLoading))
+                {
+                    OnPropertyChanged(nameof(IsFetchingStatic));
+                    OnPropertyChanged(nameof(IsFetchingDynamic));
+                    OnPropertyChanged(nameof(IsDeviceDetailsBusy));
+                    OnPropertyChanged(nameof(IsDeviceDetailsOnlyBusy)); 
+                    UpdateCommandStates();
+                }
+            };
+
+            try
+            {
+                state.IsLoading = true;
+                await Task.Yield(); // allow UI to refresh
+                await operation();
+            }
+            finally
+            {
+                state.IsLoading = false;
+            }
+        }
+
+        private async Task GetDynamicDataAsync()
+        {
+            if (SelectedDevice == null)
+            {
+                DeviceJson = "No device selected.";
+                return;
+            }
+
+            StopDynamicUpdates();
+
+            await RunWithLoader("DynamicData", async () =>
+            {
+                await Task.Delay(1000);
+                var initialData = await _dataProvider.GetDynamicDataAsync(SelectedDevice);
+
+                if (string.IsNullOrWhiteSpace(initialData))
+                {
+                    DeviceJson = "Dynamic data is empty.";
+                }
+                else
+                {
+                    var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(initialData);
+                    DeviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+                }
+            });
+
+            StartDynamicUpdates(LiveUpdateHandler);
+        }
+
+        private void LiveUpdateHandler(string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                DeviceJson = "Dynamic data is empty.";
+                return;
+            }
+
+            // Fire-and-forget async task to avoid blocking Action<string>
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(content);
+                    var formatted = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+
+                    // Update UI on main thread
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        DeviceJson = formatted;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        DeviceJson = $"Error parsing dynamic JSON: {ex.Message}";
+                    });
+                }
+            });
+        }
+
+        private void OpenResourceWindow()
+        {
+            var popup = new ResourceInputWindow
+            {
+                Owner = Window.GetWindow(Application.Current.MainWindow),
+                StaticData = _staticResourceInput,
+                DynamicData = _dynamicResourceInput
+            };
+
+            if (popup.ShowDialog() == true)
+            {
+                _staticResourceInput = popup.StaticData;
+                _dynamicResourceInput = popup.DynamicData;
+
+                MessageBox.Show("Configurations saved");
+            }
         }
 
         private void LoadPorts(string agent, bool isNewDevice = true)
@@ -155,11 +324,11 @@ namespace DeviceTesterCore.Models
             {
                 if (!isNewDevice)
                 {
-                    if(!AvailablePorts.Contains(EditingDevice.Port))
+                    if (!AvailablePorts.Contains(EditingDevice.Port))
                     {
                         AvailablePorts.Add(EditingDevice.Port);
                         SortAvailablePorts();
-                    }   
+                    }
                 }
                 else
                 {
@@ -232,7 +401,7 @@ namespace DeviceTesterCore.Models
         private void Clear(object obj)
         {
             ErrorMessage = string.Empty;
-            SelectedDevice = null;                
+            SelectedDevice = null;
             EditingDevice = CreateDefaultDevice();
             EditingDevice.Agent = AvailableAgents.First();
             EditingDevice.Port = AvailablePorts.FirstOrDefault();
@@ -246,9 +415,17 @@ namespace DeviceTesterCore.Models
             await Task.Delay(500);
             bool result = new Random().Next(0, 2) == 1;
             device.IsAuthenticated = result;
+            EditingDevice.IsAuthenticated = result;
 
+            if (!result)
+            {
+                DeviceJson = string.Empty;
+                StopDynamicUpdates();
+            }
+                
             await _repo.SaveDevicesAsync(Devices);
             OnPropertyChanged(nameof(Devices));
+            UpdateCommandStates();
 
             MessageBox.Show(result ? "Authentication succeeded" : "Authentication failed");
         }
@@ -279,7 +456,7 @@ namespace DeviceTesterCore.Models
         {
             return new Device();
         }
-            
+
 
         public async Task LoadDevicesAsync(bool initial = false)
         {
@@ -294,17 +471,18 @@ namespace DeviceTesterCore.Models
 
             if (initial)
             {
-                await Task.Delay(2000);
                 AuthenticateAllDevices();
+                UpdateCommandStates();
                 await _repo.SaveDevicesAsync(Devices);
                 OnPropertyChanged(nameof(Devices));
             }
         }
 
-        private void AuthenticateAllDevices()
+        private async void AuthenticateAllDevices()
         {
-            if(Devices is not null && Devices.Count > 0)
+            if (Devices is not null && Devices.Count > 0)
             {
+                await Task.Delay(2000);
                 foreach (var device in Devices)
                 {
                     bool result = new Random().Next(0, 2) == 1;
@@ -316,14 +494,19 @@ namespace DeviceTesterCore.Models
         // ================= Dynamic Data =================
         public async Task GetStaticDataAsync()
         {
+            if (SelectedDevice == null)
+            {
+                DeviceJson = "No device selected.";
+                return;
+            }
             StopDynamicUpdates();
             if (SelectedDevice != null)
             {
                 DeviceJson = null; //loading spinner
-                await Task.Delay(1000);
+                await Task.Delay(2000);
                 DeviceJson = await _dataProvider.GetStaticAsync(SelectedDevice);
             }
-                
+
         }
 
         public void StartDynamicUpdates(Action<string> onDataReceived)
@@ -339,7 +522,5 @@ namespace DeviceTesterCore.Models
             DeviceJson = string.Empty;
         }
 
-        private void OnPropertyChanged(string prop) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

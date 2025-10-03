@@ -10,11 +10,12 @@ namespace DeviceTesterServices.Services
     {
         private readonly string[] _dynamicFiles;
         private readonly string _staticFilePath;
+        private readonly string _dynamicFilePath;
         private readonly System.Timers.Timer _timer;
         private int _fileIndex = 0;
         private Action<string>? _onDataReceived;
 
-        public JsonDeviceDataProvider(string[] dynamicFiles, string? staticFilePath = null, double intervalMs = 5000)
+        public JsonDeviceDataProvider(string[] dynamicFiles,string? dynamicFilePath=null, string? staticFilePath = null, double intervalMs = 5000)
         {
             if (dynamicFiles == null || dynamicFiles.Length == 0)
                 throw new ArgumentException("dynamicFiles cannot be null or empty.");
@@ -24,9 +25,24 @@ namespace DeviceTesterServices.Services
             _timer.Elapsed += TimerElapsed;
             _timer.AutoReset = true;
             _staticFilePath = staticFilePath ?? Path.Combine("DummyData", "StaticData.json");
+            _dynamicFilePath = dynamicFilePath ?? Path.Combine("DummyData", "DynamicData1.json");
         }
 
-        public async Task<string> GetStaticAsync(Device device)
+        public async Task<string> GetDynamicDataAsync(Device device)
+        {
+            try
+            {
+                if (!File.Exists(_staticFilePath))
+                    throw new FileNotFoundException("Dynamic data file not found.", _dynamicFilePath);
+
+                return await File.ReadAllTextAsync(_dynamicFilePath);
+            }
+            catch (Exception ex)
+            {
+                // Optionally log error
+                throw new InvalidOperationException("Failed to read dynamic data.", ex);
+            }
+        }public async Task<string> GetStaticAsync(Device device)
         {
             try
             {
@@ -52,8 +68,6 @@ namespace DeviceTesterServices.Services
 
             try
             {
-                SendNextDynamicFile();
-
                 _timer.Start();
             }
             catch (Exception ex)

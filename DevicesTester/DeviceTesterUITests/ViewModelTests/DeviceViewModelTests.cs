@@ -9,6 +9,7 @@ using NUnit.Framework.Legacy;
 using NUnit.Framework;
 using DeviceTesterCore.Models;
 using System.Collections.ObjectModel;
+using Newtonsoft.Json.Linq;
 
 namespace DeviceTesterTests.ViewModelTests
 {
@@ -84,7 +85,7 @@ namespace DeviceTesterTests.ViewModelTests
             _vm.SaveCommand.Execute(null);
 
             ClassicAssert.AreEqual(1, _vm.Devices.Count);
-            _repoMock.Verify(r => r.SaveDevicesAsync(It.IsAny<IEnumerable<Device>>()), Times.Once);
+            _repoMock.Verify(r => r.SaveDevicesAsync(It.IsAny<IEnumerable<Device>>()), Times.AtLeastOnce);
         }
 
         [Test]

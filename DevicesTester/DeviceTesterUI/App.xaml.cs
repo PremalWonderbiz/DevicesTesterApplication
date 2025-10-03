@@ -39,11 +39,11 @@ namespace DeviceTesterUI
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;
                 string[] dynamicFiles = new string[]
                 {
-                    Path.Combine(exeDir, "DummyData", "DynamicData1.json"),
                     Path.Combine(exeDir, "DummyData", "DynamicData2.json"),
                     Path.Combine(exeDir, "DummyData", "DynamicData3.json"),
                     Path.Combine(exeDir, "DummyData", "DynamicData4.json"),
-                    Path.Combine(exeDir, "DummyData", "DynamicData5.json")
+                    Path.Combine(exeDir, "DummyData", "DynamicData5.json"),
+                    Path.Combine(exeDir, "DummyData", "DynamicData1.json")
                 };
 
                 return new JsonDeviceDataProvider(dynamicFiles, intervalMs: 2000);

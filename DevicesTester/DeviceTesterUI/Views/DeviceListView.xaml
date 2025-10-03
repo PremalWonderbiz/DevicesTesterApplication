@@ -6,6 +6,7 @@
              Background="White">
     <UserControl.Resources>
         <conv:BoolToBrushConverter x:Key="BoolToBrushConverter"/>
+        <conv:BooleanNegationConverter x:Key="BooleanNegationConverter"/>
     </UserControl.Resources>
     <Grid>
         <DataGrid x:Name="DeviceDataGrid"
@@ -22,7 +23,8 @@
           GridLinesVisibility="None"
           BorderBrush="LightGray"
           HorizontalAlignment="Stretch"
-                  SelectionMode="Single">
+                  SelectionMode="Single"
+                  IsEnabled="{Binding IsDeviceDetailsBusy, Converter={StaticResource BooleanNegationConverter}}">
 
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
