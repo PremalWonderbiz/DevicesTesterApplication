@@ -13,92 +13,84 @@ using Newtonsoft.Json;
 
 namespace DeviceTesterCore.Models
 {
-    public class DeviceViewModel : INotifyPropertyChanged
+    public class DeviceViewModel : BaseViewModel
     {
+        #region DeviceListViewModel refactoring
         // new sub-VM instance (field initializer ensures availability before ctor runs)
         private readonly DeviceListViewModel _list = new DeviceListViewModel();
+        
         public DeviceListViewModel List => _list;
 
+        #endregion
 
-        // wrapper for Devices (keeps previous name/API so methods compile unchanged)
-        public ObservableCollection<Device> Devices
-        {
-            get => List.Devices;
-            set
-            {
-                if (List.Devices != value)
-                {
-                    List.Devices = value;
-                    OnPropertyChanged(nameof(Devices));
-                }
-            }
-        }
-
-        // wrapper for SelectedDevice that preserves the original side-effects (no method bodies changed)
-        public Device SelectedDevice
-        {
-            get => List.SelectedDevice;
-            set
-            {
-                if (List.SelectedDevice != value)
-                {
-                    List.SelectedDevice = value;
-
-                    // preserve original behavior (calls already present in your file)
-                    OnPropertyChanged(nameof(SelectedDevice));
-                    OnSelectedDeviceChanged();
-                    UpdateCommandStates();
-                }
-            }
-        }
-
-
-        private readonly IDeviceRepository _repo;
-        private readonly IDeviceDataProvider _dataProvider;
-
-        //public ObservableCollection<Device> Devices { get; set; } = new();
-
-        private string _staticResourceInput;
-        
-        private string _dynamicResourceInput;
-
-        //private Device _selectedDevice;
-        //public Device SelectedDevice
+        #region DeviceFormViewModel refactoring
+        //private Device _editingDevice;
+        //public Device EditingDevice
         //{
-        //    get => _selectedDevice;
+        //    get => _editingDevice;
         //    set
         //    {
-        //        if (_selectedDevice != value)
+        //        if (_editingDevice != null)
         //        {
-        //            _selectedDevice = value;
-        //            OnPropertyChanged(nameof(SelectedDevice));
-        //            OnSelectedDeviceChanged();
-        //            UpdateCommandStates();
+        //            _editingDevice.ErrorsChanged -= EditingDevice_ErrorsChanged;
+        //            _editingDevice.PropertyChanged -= EditingDevice_PropertyChanged;
         //        }
+
+        //        _editingDevice = value;
+
+        //        if (_editingDevice != null)
+        //        {
+        //            _editingDevice.ErrorsChanged += EditingDevice_ErrorsChanged;
+        //            _editingDevice.PropertyChanged += EditingDevice_PropertyChanged;
+
+        //            // Ensure ports are loaded for the current agent
+        //            LoadPorts(_editingDevice.Agent, string.IsNullOrEmpty(_editingDevice.DeviceId));
+        //        }
+
+        //        OnPropertyChanged(nameof(EditingDevice));
+        //        SaveCommand.RaiseCanExecuteChanged();
+        //        ClearCommand.RaiseCanExecuteChanged();
         //    }
         //}
 
-        private Device _editingDevice;
+        //public ObservableCollection<string> AvailableAgents { get; } = new()
+        //{
+        //    "Redfish", "EcoRT", "SoftdPACManager"
+        //};
+
+        //public ObservableCollection<string> AvailablePorts { get; } = new();
+
+        //private string _errorMessage;
+        //public string ErrorMessage
+        //{
+        //    get => _errorMessage;
+        //    set { _errorMessage = value; OnPropertyChanged(nameof(ErrorMessage)); }
+        //}
+
+        private readonly DeviceFormViewModel _form = new DeviceFormViewModel();
+        public DeviceFormViewModel Form => _form;
+
+        // wrapper for EditingDevice that preserves the original side-effects (no method bodies changed)
         public Device EditingDevice
         {
-            get => _editingDevice;
+            get => Form.EditingDevice;
             set
             {
-                if (_editingDevice != null)
+                if (Form.EditingDevice != null)
                 {
-                    _editingDevice.ErrorsChanged -= EditingDevice_ErrorsChanged;
-                    _editingDevice.PropertyChanged -= EditingDevice_PropertyChanged;
+                    Form.EditingDevice.ErrorsChanged -= EditingDevice_ErrorsChanged;
+                    Form.EditingDevice.PropertyChanged -= EditingDevice_PropertyChanged;
                 }
 
-                _editingDevice = value;
+                Form.EditingDevice = value;
 
-                if (_editingDevice != null)
+                if (Form.EditingDevice != null)
                 {
-                    _editingDevice.ErrorsChanged += EditingDevice_ErrorsChanged;
-                    _editingDevice.PropertyChanged += EditingDevice_PropertyChanged;
+                    Form.EditingDevice.ErrorsChanged += EditingDevice_ErrorsChanged;
+                    Form.EditingDevice.PropertyChanged += EditingDevice_PropertyChanged;
 
                     // Ensure ports are loaded for the current agent
-                    LoadPorts(_editingDevice.Agent, string.IsNullOrEmpty(_editingDevice.DeviceId));
+                    LoadPorts(Form.EditingDevice.Agent, string.IsNullOrEmpty(Form.EditingDevice.DeviceId));
                 }
 
                 OnPropertyChanged(nameof(EditingDevice));
@@ -106,6 +98,44 @@ namespace DeviceTesterCore.Models
                 ClearCommand.RaiseCanExecuteChanged();
             }
         }
+
+        public ObservableCollection<string> AvailableAgents { get => Form.AvailableAgents; }
+
+        public ObservableCollection<string> AvailablePorts { get => Form.AvailablePorts; }
+
+        public string ErrorMessage
+        {
+            get => Form.ErrorMessage;
+            set { Form.ErrorMessage = value; OnPropertyChanged(nameof(ErrorMessage)); }
+        }
+
+        #endregion
+
+        #region DeviceDetailsViewModel refactoring
+        //private string _deviceJson;
+        //public string DeviceJson
+        //{
+        //    get => _deviceJson;
+        //    set { _deviceJson = value; OnPropertyChanged(nameof(DeviceJson)); }
+        //}
+
+        private readonly DeviceDetailsViewModel _details = new DeviceDetailsViewModel();
+        public DeviceDetailsViewModel Details => _details;
+
+        public string DeviceJson
+        {
+            get => Details.DeviceJson;
+            set { Details.DeviceJson = value; OnPropertyChanged(nameof(DeviceJson)); }
+        }
+
+        private string _staticResourceInput;
+
+        private string _dynamicResourceInput;
+
+        #endregion
+
+        private readonly IDeviceRepository _repo;
+        private readonly IDeviceDataProvider _dataProvider;
 
         private void EditingDevice_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -124,35 +154,14 @@ namespace DeviceTesterCore.Models
         {
             StopDynamicUpdates();
 
-            if (SelectedDevice != null)
-                EditingDevice = new Device(SelectedDevice); // copy constructor
+            if (List.SelectedDevice != null)
+                EditingDevice = new Device(List.SelectedDevice); // copy constructor
             else
                 EditingDevice = CreateDefaultDevice();
 
             DeviceJson = string.Empty;
             ErrorMessage = string.Empty;
-        }
-
-        public ObservableCollection<string> AvailableAgents { get; } = new()
-        {
-            "Redfish", "EcoRT", "SoftdPACManager"
-        };
-
-        public ObservableCollection<string> AvailablePorts { get; } = new();
-
-        private string _deviceJson;
-        public string DeviceJson
-        {
-            get => _deviceJson;
-            set { _deviceJson = value; OnPropertyChanged(nameof(DeviceJson)); }
-        }
-
-        private string _errorMessage;
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set { _errorMessage = value; OnPropertyChanged(nameof(ErrorMessage)); }
-        }
+        }  
 
         // ================= Commands =================
         public ActionCommand SaveCommand { get; }
@@ -167,6 +176,15 @@ namespace DeviceTesterCore.Models
         {
             _repo = repo;
             _dataProvider = dataProvider;
+
+            List.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(DeviceListViewModel.SelectedDevice))
+                {
+                    OnSelectedDeviceChanged();
+                    UpdateCommandStates();
+                }
+            };
 
             SaveCommand = new ActionCommand(async _ => await SaveDeviceAsync(), CanSave);
             ClearCommand = new ActionCommand(Clear);
@@ -208,7 +226,6 @@ namespace DeviceTesterCore.Models
         public bool IsFetchingStatic => LoadingStates.ContainsKey("StaticData") && LoadingStates["StaticData"].IsLoading;
         public bool IsFetchingDynamic => LoadingStates.ContainsKey("DynamicData") && LoadingStates["DynamicData"].IsLoading;
 
-
         /// <summary>
         /// Global busy flag derived from LoadingStates
         /// </summary>
@@ -217,7 +234,7 @@ namespace DeviceTesterCore.Models
 
         private bool CanExecuteCommand()
         {
-            return SelectedDevice?.IsAuthenticated == true && !IsDeviceDetailsBusy;
+            return List.SelectedDevice?.IsAuthenticated == true && !IsDeviceDetailsBusy;
         }
 
         private void UpdateCommandStates()
@@ -260,7 +277,7 @@ namespace DeviceTesterCore.Models
 
         private async Task GetDynamicDataAsync()
         {
-            if (SelectedDevice == null)
+            if (List.SelectedDevice == null)
             {
                 DeviceJson = "No device selected.";
                 return;
@@ -271,7 +288,7 @@ namespace DeviceTesterCore.Models
             await RunWithLoader("DynamicData", async () =>
             {
                 await Task.Delay(1000);
-                var initialData = await _dataProvider.GetDynamicDataAsync(SelectedDevice);
+                var initialData = await _dataProvider.GetDynamicDataAsync(List.SelectedDevice);
 
                 if (string.IsNullOrWhiteSpace(initialData))
                 {
@@ -391,7 +408,7 @@ namespace DeviceTesterCore.Models
             if (EditingDevice == null) return;
 
             // Duplicate IP + Port check
-            bool duplicateIpPort = Devices.Any(d =>
+            bool duplicateIpPort = List.Devices.Any(d =>
                 d.IpAddress == EditingDevice.IpAddress &&
                 d.Port == EditingDevice.Port &&
                 d.DeviceId != EditingDevice.DeviceId);
@@ -411,19 +428,19 @@ namespace DeviceTesterCore.Models
                 EditingDevice.SolutionId = Guid.NewGuid().ToString();
 
             // Add or update using copy constructor
-            var existing = Devices.FirstOrDefault(d => d.DeviceId == EditingDevice.DeviceId);
+            var existing = List.Devices.FirstOrDefault(d => d.DeviceId == EditingDevice.DeviceId);
             if (existing != null)
             {
-                var index = Devices.IndexOf(existing);
-                Devices[index] = new Device(EditingDevice);
-                await _repo.SaveDevicesAsync(Devices);
+                var index = List.Devices.IndexOf(existing);
+                List.Devices[index] = new Device(EditingDevice);
+                await _repo.SaveDevicesAsync(List.Devices);
                 MessageBox.Show("Device updated successfully!");
             }
             else
             {
                 EditingDevice.IsAuthenticated = false;
-                Devices.Insert(0, new Device(EditingDevice));
-                await _repo.SaveDevicesAsync(Devices);
+                List.Devices.Insert(0, new Device(EditingDevice));
+                await _repo.SaveDevicesAsync(List.Devices);
                 MessageBox.Show("Device saved successfully!");
             }
 
@@ -439,7 +456,7 @@ namespace DeviceTesterCore.Models
         private void Clear(object obj)
         {
             ErrorMessage = string.Empty;
-            SelectedDevice = null;
+            List.SelectedDevice = null;
             EditingDevice = CreateDefaultDevice();
             EditingDevice.Agent = AvailableAgents.First();
             EditingDevice.Port = AvailablePorts.FirstOrDefault();
@@ -461,8 +478,8 @@ namespace DeviceTesterCore.Models
                 StopDynamicUpdates();
             }
                 
-            await _repo.SaveDevicesAsync(Devices);
-            OnPropertyChanged(nameof(Devices));
+            await _repo.SaveDevicesAsync(List.Devices);
+            OnPropertyChanged(nameof(List.Devices));
             UpdateCommandStates();
 
             MessageBox.Show(result ? "Authentication succeeded" : "Authentication failed");
@@ -480,10 +497,10 @@ namespace DeviceTesterCore.Models
 
             if (confirm == MessageBoxResult.Yes)
             {
-                Devices.Remove(device);
-                await _repo.SaveDevicesAsync(Devices);
+                List.Devices.Remove(device);
+                await _repo.SaveDevicesAsync(List.Devices);
 
-                if (SelectedDevice == device)
+                if (List.SelectedDevice == device)
                     EditingDevice = CreateDefaultDevice();
 
                 MessageBox.Show("Device deleted successfully");
@@ -495,33 +512,59 @@ namespace DeviceTesterCore.Models
             return new Device();
         }
 
-
         public async Task LoadDevicesAsync(bool initial = false)
         {
-            Devices.Clear();
-            var devicesFromFile = await _repo.LoadDevicesAsync();
-            foreach (var device in devicesFromFile)
+            try
             {
-                if (initial)
-                    device.IsAuthenticated = null;
-                Devices.Add(device);
-            }
+                // Clear old list
+                List.Devices.Clear();
 
-            if (initial)
+                // Load from repository
+                var devicesFromFile = await _repo.LoadDevicesAsync();
+
+                // Populate the observable collection
+                foreach (var device in devicesFromFile)
+                {
+                    if (initial)
+                        device.IsAuthenticated = null;
+                    List.Devices.Add(device);
+                }
+
+                // Additional actions only on first load
+                if (initial)
+                {
+                    await RunWithLoader("AuthenticateAllDevices", async () =>
+                    {
+                        await AuthenticateAllDevices();
+                    });
+
+                    await _repo.SaveDevicesAsync(List.Devices);
+                    OnPropertyChanged(nameof(List.Devices));
+                }
+            }
+            catch (Exception ex)
             {
-                AuthenticateAllDevices();
+                foreach (var device in List.Devices)
+                {
+                    if (initial)
+                        device.IsAuthenticated = false;
+                }
+                Console.WriteLine($"Error in LoadDevicesAsync: {ex.Message}");
+            }
+            finally
+            {
+                AuthenticateCommand.RaiseCanExecuteChanged();
                 UpdateCommandStates();
-                await _repo.SaveDevicesAsync(Devices);
-                OnPropertyChanged(nameof(Devices));
             }
         }
 
-        private async void AuthenticateAllDevices()
+
+        private async Task AuthenticateAllDevices()
         {
-            if (Devices is not null && Devices.Count > 0)
+            if (List.Devices is not null && List.Devices.Count > 0)
             {
                 await Task.Delay(2000);
-                foreach (var device in Devices)
+                foreach (var device in List.Devices)
                 {
                     bool result = new Random().Next(0, 2) == 1;
                     device.IsAuthenticated = result;
@@ -533,37 +576,33 @@ namespace DeviceTesterCore.Models
         // ================= Dynamic Data =================
         public async Task GetStaticDataAsync()
         {
-            if (SelectedDevice == null)
+            if (List.SelectedDevice == null)
             {
                 DeviceJson = "No device selected.";
                 return;
             }
             StopDynamicUpdates();
-            if (SelectedDevice != null)
+            if (List.SelectedDevice != null)
             {
                 DeviceJson = null; //loading spinner
                 await Task.Delay(2000);
-                DeviceJson = await _dataProvider.GetStaticAsync(SelectedDevice);
+                DeviceJson = await _dataProvider.GetStaticAsync(List.SelectedDevice);
             }
 
         }
 
         public void StartDynamicUpdates(Action<string> onDataReceived)
         {
-            if (SelectedDevice == null) return;
-            _dataProvider.StartDynamicUpdates(SelectedDevice, onDataReceived);
+            if (List.SelectedDevice == null) return;
+            _dataProvider.StartDynamicUpdates(List.SelectedDevice, onDataReceived);
         }
 
         public void StopDynamicUpdates()
         {
-            if (SelectedDevice == null) return;
-            _dataProvider.StopDynamicUpdates(SelectedDevice);
+            if (List.SelectedDevice == null) return;
+            _dataProvider.StopDynamicUpdates(List.SelectedDevice);
             DeviceJson = string.Empty;
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         // Dictionary to hold multiple loading states
         public Dictionary<string, LoadingState> LoadingStates { get; } = new();

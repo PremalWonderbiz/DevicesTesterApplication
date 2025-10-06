@@ -10,8 +10,8 @@
     </UserControl.Resources>
     <Grid>
         <DataGrid x:Name="DeviceDataGrid"
-          ItemsSource="{Binding Devices}"
-          SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
+          ItemsSource="{Binding List.Devices}"
+          SelectedItem="{Binding List.SelectedDevice, Mode=TwoWay}"
           AutoGenerateColumns="False"
           HeadersVisibility="Column"
           CanUserAddRows="False"

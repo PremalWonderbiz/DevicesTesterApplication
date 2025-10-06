@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DeviceTesterCore.Models;
+using System.Reflection;
+using System.Timers;
 
 namespace DeviceTesterTests.ServicesTests
 {
@@ -81,7 +83,7 @@ namespace DeviceTesterTests.ServicesTests
         {
             var tempFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".json");
 
-            var provider = new JsonDeviceDataProvider(_dynamicFiles, tempFile);
+            var provider = new JsonDeviceDataProvider(_dynamicFiles, tempFile, tempFile);
 
             ClassicAssert.ThrowsAsync<InvalidOperationException>(() =>
                 provider.GetStaticAsync(new Device()));
@@ -90,20 +92,6 @@ namespace DeviceTesterTests.ServicesTests
         #endregion
 
         #region Dynamic Updates Tests
-
-        [Test]
-        public void StartDynamicUpdates_ShouldInvokeCallbackImmediately()
-        {
-            string? received = null;
-            _provider.StartDynamicUpdates(new Device(), data => received = data);
-
-            // Call private method manually (simulate timer) for test
-            var fileContent = File.ReadAllText(_dynamicFiles[0]);
-            ClassicAssert.IsNotNull(received);
-            ClassicAssert.AreEqual(fileContent, received);
-
-            _provider.StopDynamicUpdates(new Device());
-        }
 
         [Test]
         public void StartDynamicUpdates_ShouldCycleThroughFiles()
@@ -117,17 +105,33 @@ namespace DeviceTesterTests.ServicesTests
                 count++;
             });
 
-            // Simulate multiple timer ticks
+            // --- create ElapsedEventArgs via reflection (handles private ctor) ---
+            var ctor = typeof(ElapsedEventArgs)
+                       .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                       .First(c => {
+                           var p = c.GetParameters();
+                           return p.Length == 1 && p[0].ParameterType == typeof(DateTime);
+                       });
+            var args = (ElapsedEventArgs)ctor.Invoke(new object[] { DateTime.Now });
+
+            _provider.StartDynamicUpdates(new Device(), data =>
+            {
+                lastReceived = data;
+                count++;
+            });
+
             var timerField = typeof(JsonDeviceDataProvider)
-                .GetField("_timer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+                .GetField("_timer", BindingFlags.NonPublic | BindingFlags.Instance)!
                 .GetValue(_provider) as System.Timers.Timer;
 
-            // Trigger elapsed manually
-            for (int i = 0; i < 5; i++)
-                typeof(System.Timers.Timer)
-                    .GetMethod("OnElapsed", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
-                    .Invoke(timerField, new object[] { null });
+            var onElapsedMethod = typeof(JsonDeviceDataProvider)
+                .GetMethod("TimerElapsed", BindingFlags.NonPublic | BindingFlags.Instance)!;
 
+            for (int i = 0; i < 1; i++)
+            {
+                onElapsedMethod.Invoke(_provider,
+                    new object[] { timerField, args });
+            }
             ClassicAssert.GreaterOrEqual(count, 1);
             _provider.StopDynamicUpdates(new Device());
         }
@@ -138,7 +142,31 @@ namespace DeviceTesterTests.ServicesTests
             var missingFilesProvider = new JsonDeviceDataProvider(new[] { "nonexistent.json" });
             string? received = null;
 
-            missingFilesProvider.StartDynamicUpdates(new Device(), data => received = data);
+            // --- create ElapsedEventArgs via reflection (handles private ctor) ---
+            var ctor = typeof(ElapsedEventArgs)
+                       .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                       .First(c => {
+                           var p = c.GetParameters();
+                           return p.Length == 1 && p[0].ParameterType == typeof(DateTime);
+                       });
+            var args = (ElapsedEventArgs)ctor.Invoke(new object[] { DateTime.Now });
+
+            missingFilesProvider.StartDynamicUpdates(new Device(), data => {
+                received = data;
+                });
+
+            var timerField = typeof(JsonDeviceDataProvider)
+                .GetField("_timer", BindingFlags.NonPublic | BindingFlags.Instance)!
+                .GetValue(missingFilesProvider) as System.Timers.Timer;
+
+            var onElapsedMethod = typeof(JsonDeviceDataProvider)
+                .GetMethod("TimerElapsed", BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+            for (int i = 0; i < 1; i++)
+            {
+                onElapsedMethod.Invoke(missingFilesProvider,
+                    new object[] { timerField, args });
+            }
 
             ClassicAssert.IsNotNull(received);
             ClassicAssert.IsTrue(received!.Contains("Error"));

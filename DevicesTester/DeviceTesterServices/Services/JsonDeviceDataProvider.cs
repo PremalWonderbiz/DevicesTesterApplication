@@ -42,7 +42,9 @@ namespace DeviceTesterServices.Services
                 // Optionally log error
                 throw new InvalidOperationException("Failed to read dynamic data.", ex);
             }
-        }public async Task<string> GetStaticAsync(Device device)
+        }
+        
+        public async Task<string> GetStaticAsync(Device device)
         {
             try
             {

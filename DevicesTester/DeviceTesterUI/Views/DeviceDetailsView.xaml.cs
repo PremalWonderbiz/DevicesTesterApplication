@@ -51,7 +51,7 @@ namespace DeviceTesterUI.Views
 
         private void Vm_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(DeviceViewModel.SelectedDevice))
+            if (e.PropertyName == nameof(DeviceViewModel.List.SelectedDevice))
             {
                 _vm.StopDynamicUpdates();
 

@@ -8,9 +8,10 @@ using DeviceTesterCore.Models;
 
 namespace DeviceTesterUI.ViewModels
 {
-    public abstract class BaseViewModel 
+    public abstract class BaseViewModel : INotifyPropertyChanged
     {
-        
-       
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected void OnPropertyChanged(string name) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

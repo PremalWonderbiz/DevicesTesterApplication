@@ -10,8 +10,8 @@ using DeviceTesterCore.Models;
 
 namespace DeviceTesterUI.ViewModels
 {
-    // Devices collection & persistence
-    public class DeviceListViewModel : INotifyPropertyChanged
+    // Selected Device and Devices Observable
+    public class DeviceListViewModel : BaseViewModel
     {
         private ObservableCollection<Device> _devices = new();
         public ObservableCollection<Device> Devices
@@ -36,9 +36,5 @@ namespace DeviceTesterUI.ViewModels
                 OnPropertyChanged(nameof(SelectedDevice));
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

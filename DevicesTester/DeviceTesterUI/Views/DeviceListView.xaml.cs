@@ -26,46 +26,5 @@ namespace DeviceTesterUI.Views
         {
             InitializeComponent();
         }
-
-        private void DeviceDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
-
-        private async void Authenticate_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is Device device)
-            {
-                if (DataContext is DeviceViewModel viewModel)
-                {
-                    //bool result = await viewModel.AuthenticateDeviceAsync(device);
-                    //if (result)
-                    //    MessageBox.Show($"Authentication succeeded");
-                    //else
-                    //    MessageBox.Show($"Authentication failed");
-                }
-            }
-        }
-
-        private async void Delete_Click(object sender, RoutedEventArgs e)
-        {
-            if (sender is Button btn && btn.DataContext is Device device)
-            {
-                var viewModel = DataContext as DeviceViewModel;
-                if (viewModel != null)
-                {
-                    MessageBoxResult result = MessageBox.Show(
-                    $"Are you sure you want to delete?",
-                    "Delete Confirmation",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        //await viewModel.DeleteDeviceAsync(device);
-                        MessageBox.Show($"Device deleted successfully");
-                    }
-                }
-            }
-        }
     }
 }

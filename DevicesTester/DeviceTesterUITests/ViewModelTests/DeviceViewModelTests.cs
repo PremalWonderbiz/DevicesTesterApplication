@@ -38,7 +38,7 @@ namespace DeviceTesterTests.ViewModelTests
         public void SelectedDevice_Set_ShouldCopyDeviceToEditingDevice()
         {
             var device = new Device { DeviceId = "123", Agent = "Redfish" };
-            _vm.SelectedDevice = device;
+            _vm.List.SelectedDevice = device;
 
             ClassicAssert.AreNotSame(device, _vm.EditingDevice);
             ClassicAssert.AreEqual(device.DeviceId, _vm.EditingDevice.DeviceId);
@@ -48,7 +48,7 @@ namespace DeviceTesterTests.ViewModelTests
         [Test]
         public void SelectedDevice_SetToNull_ShouldCreateDefaultEditingDevice()
         {
-            _vm.SelectedDevice = null;
+            _vm.List.SelectedDevice = null;
             ClassicAssert.IsNotNull(_vm.EditingDevice);
             ClassicAssert.IsEmpty(_vm.EditingDevice.DeviceId);
         }
@@ -72,8 +72,8 @@ namespace DeviceTesterTests.ViewModelTests
             _repoMock.Setup(r => r.LoadDevicesAsync()).ReturnsAsync(list);
 
             await _vm.LoadDevicesAsync();
-            ClassicAssert.AreEqual(1, _vm.Devices.Count);
-            ClassicAssert.AreEqual("1", _vm.Devices[0].DeviceId);
+            ClassicAssert.AreEqual(1, _vm.List.Devices.Count);
+            ClassicAssert.AreEqual("1", _vm.List.Devices[0].DeviceId);
         }
 
         [Test]
@@ -84,7 +84,7 @@ namespace DeviceTesterTests.ViewModelTests
             // Execute SaveCommand which internally calls SaveDeviceAsync
             _vm.SaveCommand.Execute(null);
 
-            ClassicAssert.AreEqual(1, _vm.Devices.Count);
+            ClassicAssert.AreEqual(1, _vm.List.Devices.Count);
             _repoMock.Verify(r => r.SaveDevicesAsync(It.IsAny<IEnumerable<Device>>()), Times.AtLeastOnce);
         }
 
@@ -92,22 +92,22 @@ namespace DeviceTesterTests.ViewModelTests
         public void SaveDeviceAsync_UpdateExistingDevice_ShouldReplaceDevice()
         {
             var device = new Device { DeviceId = "1", IpAddress = "127.0.0.1", Port = "9000" };
-            _vm.Devices.Add(new Device(device));
+            _vm.List.Devices.Add(new Device(device));
             _vm.EditingDevice = new Device(device);
 
             _vm.EditingDevice.IpAddress = "192.168.0.1"; // change IP
             _vm.SaveCommand.Execute(null);
 
-            ClassicAssert.AreEqual(1, _vm.Devices.Count);
-            ClassicAssert.AreEqual("192.168.0.1", _vm.Devices[0].IpAddress);
-            _repoMock.Verify(r => r.SaveDevicesAsync(It.IsAny<IEnumerable<Device>>()), Times.Once);
+            ClassicAssert.AreEqual(1, _vm.List.Devices.Count);
+            ClassicAssert.AreEqual("192.168.0.1", _vm.List.Devices[0].IpAddress);
+            _repoMock.Verify(r => r.SaveDevicesAsync(It.IsAny<IEnumerable<Device>>()), Times.AtLeastOnce);
         }
 
         [Test]
         public void SaveDeviceAsync_DuplicateIpPort_ShouldSetErrorMessage()
         {
             var device1 = new Device { DeviceId = "1", IpAddress = "127.0.0.1", Port = "9000" };
-            _vm.Devices.Add(device1);
+            _vm.List.Devices.Add(device1);
 
             _vm.EditingDevice = new Device { DeviceId = "2", IpAddress = "127.0.0.1", Port = "9000" };
             _vm.SaveCommand.Execute(null);
@@ -120,7 +120,7 @@ namespace DeviceTesterTests.ViewModelTests
         public async Task DeleteDeviceAsync_ShouldRemoveDevice()
         {
             var device = new Device { DeviceId = "1" };
-            _vm.Devices.Add(device);
+            _vm.List.Devices.Add(device);
 
             // Simulate Yes response for MessageBox
             System.Windows.MessageBoxResult original = System.Windows.MessageBoxResult.None;
@@ -128,9 +128,9 @@ namespace DeviceTesterTests.ViewModelTests
 
             _vm.DeleteCommand.Execute(device);
 
-            _vm.Devices.Remove(device); // simulate confirmation
+            _vm.List.Devices.Remove(device); // simulate confirmation
 
-            ClassicAssert.IsFalse(_vm.Devices.Contains(device));
+            ClassicAssert.IsFalse(_vm.List.Devices.Contains(device));
             _repoMock.Verify(r => r.SaveDevicesAsync(It.IsAny<IEnumerable<Device>>()), Times.AtLeastOnce);
         }
 
@@ -171,10 +171,10 @@ namespace DeviceTesterTests.ViewModelTests
         public async Task GetStaticDataAsync_ShouldCallDataProvider()
         {
             var device = new Device { DeviceId = "1" };
-            _vm.SelectedDevice = device;
+            _vm.List.SelectedDevice = device;
 
             _dataProviderMock.Setup(d => d.GetStaticAsync(device)).ReturnsAsync("StaticData");
-
+          
             await _vm.GetStaticDataAsync();
 
             ClassicAssert.AreEqual("StaticData", _vm.DeviceJson);
@@ -184,7 +184,7 @@ namespace DeviceTesterTests.ViewModelTests
         public void StartDynamicUpdates_ShouldCallDataProvider()
         {
             var device = new Device { DeviceId = "1" };
-            _vm.SelectedDevice = device;
+            _vm.List.SelectedDevice = device;
 
             bool called = false;
             _dataProviderMock.Setup(d => d.StartDynamicUpdates(device, It.IsAny<Action<string>>()))
@@ -199,7 +199,7 @@ namespace DeviceTesterTests.ViewModelTests
         public void StopDynamicUpdates_ShouldCallDataProviderAndClearJson()
         {
             var device = new Device { DeviceId = "1" };
-            _vm.SelectedDevice = device;
+            _vm.List.SelectedDevice = device;
             _vm.DeviceJson = "SomeData";
 
             _vm.StopDynamicUpdates();
