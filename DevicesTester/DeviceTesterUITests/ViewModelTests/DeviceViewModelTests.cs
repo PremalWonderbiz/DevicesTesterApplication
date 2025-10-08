@@ -177,7 +177,7 @@ namespace DeviceTesterTests.ViewModelTests
           
             await _vm.GetStaticDataAsync();
 
-            ClassicAssert.AreEqual("StaticData", _vm.DeviceJson);
+            ClassicAssert.AreEqual("StaticData", _vm.Details.DeviceJson);
         }
 
         [Test]
@@ -200,12 +200,12 @@ namespace DeviceTesterTests.ViewModelTests
         {
             var device = new Device { DeviceId = "1" };
             _vm.List.SelectedDevice = device;
-            _vm.DeviceJson = "SomeData";
+            _vm.Details.DeviceJson = "SomeData";
 
             _vm.StopDynamicUpdates();
 
             _dataProviderMock.Verify(d => d.StopDynamicUpdates(device), Times.Exactly(2));
-            ClassicAssert.IsEmpty(_vm.DeviceJson);
+            ClassicAssert.IsEmpty(_vm.Details.DeviceJson);
         }
 
         #endregion
@@ -216,9 +216,9 @@ namespace DeviceTesterTests.ViewModelTests
         public void ChangingDeviceJson_ShouldRaisePropertyChanged()
         {
             bool fired = false;
-            _vm.PropertyChanged += (s, e) => { if (e.PropertyName == "DeviceJson") fired = true; };
+            _vm.Details.PropertyChanged += (s, e) => { if (e.PropertyName == "DeviceJson") fired = true; };
 
-            _vm.DeviceJson = "Test";
+            _vm.Details.DeviceJson = "Test";
 
             ClassicAssert.IsTrue(fired);
         }

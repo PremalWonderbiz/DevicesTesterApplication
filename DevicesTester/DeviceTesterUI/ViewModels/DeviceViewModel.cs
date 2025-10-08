@@ -55,12 +55,6 @@ namespace DeviceTesterCore.Models
         private readonly DeviceDetailsViewModel _details = new DeviceDetailsViewModel();
         public DeviceDetailsViewModel Details => _details;
 
-        public string DeviceJson
-        {
-            get => Details.DeviceJson;
-            set { Details.DeviceJson = value; OnPropertyChanged(nameof(DeviceJson)); }
-        }
-
         private string _staticResourceInput;
 
         private string _dynamicResourceInput;
@@ -69,6 +63,7 @@ namespace DeviceTesterCore.Models
 
         private readonly IDeviceRepository _repo;
         private readonly IDeviceDataProvider _dataProvider;
+
 
         private void EditingDevice_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -92,7 +87,7 @@ namespace DeviceTesterCore.Models
             else
                 Form.EditingDevice = CreateDefaultDevice();
 
-            DeviceJson = string.Empty;
+            Details.DeviceJson = string.Empty;
             Form.ErrorMessage = string.Empty;
         }  
 
@@ -107,6 +102,7 @@ namespace DeviceTesterCore.Models
 
         public DeviceViewModel(IDeviceRepository repo, IDeviceDataProvider dataProvider)
         {
+          
             _repo = repo;
             _dataProvider = dataProvider;
 
@@ -238,7 +234,7 @@ namespace DeviceTesterCore.Models
         {
             if (List.SelectedDevice == null)
             {
-                DeviceJson = "No device selected.";
+                Details.DeviceJson = "No device selected.";
                 return;
             }
 
@@ -251,12 +247,12 @@ namespace DeviceTesterCore.Models
 
                 if (string.IsNullOrWhiteSpace(initialData))
                 {
-                    DeviceJson = "Dynamic data is empty.";
+                    Details.DeviceJson = "Dynamic data is empty.";
                 }
                 else
                 {
                     var parsedJson = Newtonsoft.Json.JsonConvert.DeserializeObject(initialData);
-                    DeviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
+                    Details.DeviceJson = Newtonsoft.Json.JsonConvert.SerializeObject(parsedJson, Newtonsoft.Json.Formatting.Indented);
                 }
             });
 
@@ -267,7 +263,7 @@ namespace DeviceTesterCore.Models
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                DeviceJson = "Dynamic data is empty.";
+                Details.DeviceJson = "Dynamic data is empty.";
                 return;
             }
 
@@ -282,14 +278,14 @@ namespace DeviceTesterCore.Models
                     // Update UI on main thread
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        DeviceJson = formatted;
+                        Details.DeviceJson = formatted;
                     });
                 }
                 catch (Exception ex)
                 {
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        DeviceJson = $"Error parsing dynamic JSON: {ex.Message}";
+                        Details.DeviceJson = $"Error parsing dynamic JSON: {ex.Message}";
                     });
                 }
             });
@@ -406,11 +402,13 @@ namespace DeviceTesterCore.Models
                 MessageBox.Show("Device saved successfully!");
             }
 
-     
+
+            
 
             Clear(new object());
         }
 
+        
 
         private bool CanSave(object obj)
         {
@@ -439,7 +437,7 @@ namespace DeviceTesterCore.Models
 
             if (!result)
             {
-                DeviceJson = string.Empty;
+                Details.DeviceJson = string.Empty;
                 StopDynamicUpdates();
             }
                 
@@ -448,6 +446,8 @@ namespace DeviceTesterCore.Models
             UpdateCommandStates();
 
             MessageBox.Show(result ? "Authentication succeeded" : "Authentication failed");
+
+           
         }
 
         private async Task DeleteDeviceAsync(Device device)
@@ -543,15 +543,15 @@ namespace DeviceTesterCore.Models
         {
             if (List.SelectedDevice == null)
             {
-                DeviceJson = "No device selected.";
+                Details.DeviceJson = "No device selected.";
                 return;
             }
             StopDynamicUpdates();
             if (List.SelectedDevice != null)
             {
-                DeviceJson = null; //loading spinner
+                Details.DeviceJson = null; //loading spinner
                 await Task.Delay(2000);
-                DeviceJson = await _dataProvider.GetStaticAsync(List.SelectedDevice);
+                Details.DeviceJson = await _dataProvider.GetStaticAsync(List.SelectedDevice);
             }
 
         }
@@ -566,7 +566,7 @@ namespace DeviceTesterCore.Models
         {
             if (List.SelectedDevice == null) return;
             _dataProvider.StopDynamicUpdates(List.SelectedDevice);
-            DeviceJson = string.Empty;
+            Details.DeviceJson = string.Empty;
         }
 
         // Dictionary to hold multiple loading states
@@ -613,4 +613,5 @@ namespace DeviceTesterCore.Models
         public static string InitializationError => initializationError;
     }
 }
+
 
