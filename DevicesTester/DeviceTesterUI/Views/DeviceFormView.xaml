@@ -57,8 +57,8 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,10,10,0">
             <Label Content="Agent*" FontSize="11"/>
             <ComboBox Height="25" FontSize="11"
-                      ItemsSource="{Binding AvailableAgents}"
-                      SelectedItem="{Binding EditingDevice.Agent, Mode=TwoWay}"
+                      ItemsSource="{Binding Form.AvailableAgents}"
+                      SelectedItem="{Binding Form.EditingDevice.Agent, Mode=TwoWay}"
                       VerticalContentAlignment="Center"/>
         </StackPanel>
 
@@ -66,7 +66,7 @@
         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,15,10,0">
             <Label Content="IP Address*" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.IpAddress, Mode=TwoWay,
+                     Text="{Binding Form.EditingDevice.IpAddress, Mode=TwoWay,
                                     UpdateSourceTrigger=PropertyChanged,
                                     ValidatesOnDataErrors=True,
                                     NotifyOnValidationError=True }"
@@ -77,8 +77,8 @@
             <Label Content="Port*" FontSize="11"/>
             <ComboBox x:Name="PortComboBox"
           Height="25" FontSize="11"
-          ItemsSource="{Binding AvailablePorts}"
-          Text="{Binding EditingDevice.Port, Mode=TwoWay,
+          ItemsSource="{Binding Form.AvailablePorts}"
+          Text="{Binding Form.EditingDevice.Port, Mode=TwoWay,
                          UpdateSourceTrigger=PropertyChanged,
                          ValidatesOnDataErrors=True,
                          NotifyOnValidationError=True}"
@@ -91,7 +91,7 @@
         <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,15,10,0">
             <Label Content="Username*" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.Username, Mode=TwoWay,
+                     Text="{Binding Form.EditingDevice.Username, Mode=TwoWay,
                                     UpdateSourceTrigger=PropertyChanged,
                                     ValidatesOnDataErrors=True,
                                     NotifyOnValidationError=True}"
@@ -101,7 +101,7 @@
         <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,15,0,0">
             <Label Content="Password*" FontSize="11"/>
             <PasswordBox Height="25" FontSize="11"
-                         local:PasswordBoxHelper.BoundPassword="{Binding EditingDevice.Password, Mode=TwoWay,
+                         local:PasswordBoxHelper.BoundPassword="{Binding Form.EditingDevice.Password, Mode=TwoWay,
                                                                       UpdateSourceTrigger=PropertyChanged,
                                                                       ValidatesOnDataErrors=True,
                                                                       NotifyOnValidationError=True}"
@@ -111,7 +111,7 @@
         <!-- Row 4: Secure Connection -->
         <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,15,10,0" Orientation="Horizontal">
             <Label Content="Use Secure Connection*" FontSize="11" Margin="0,0,5,0"/>
-            <CheckBox IsChecked="{Binding EditingDevice.UseSecureConnection, Mode=TwoWay}"
+            <CheckBox IsChecked="{Binding Form.EditingDevice.UseSecureConnection, Mode=TwoWay}"
                       VerticalAlignment="Center" VerticalContentAlignment="Center"/>
         </StackPanel>
 
@@ -119,7 +119,7 @@
         <StackPanel Grid.Row="4" Grid.Column="0" Margin="0,10,10,0">
             <Label Content="DeviceId" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.DeviceId, Mode=TwoWay,
+                     Text="{Binding Form.EditingDevice.DeviceId, Mode=TwoWay,
                                     UpdateSourceTrigger=PropertyChanged,
                                     ValidatesOnDataErrors=True,
                                     NotifyOnValidationError=True}"
@@ -129,7 +129,7 @@
         <StackPanel Grid.Row="4" Grid.Column="1" Margin="0,10,0,0">
             <Label Content="SolutionId" FontSize="11"/>
             <TextBox Height="25" FontSize="11"
-                     Text="{Binding EditingDevice.SolutionId, Mode=TwoWay,
+                     Text="{Binding Form.EditingDevice.SolutionId, Mode=TwoWay,
                                     UpdateSourceTrigger=PropertyChanged,
                                     ValidatesOnDataErrors=True,
                                     NotifyOnValidationError=True}"
@@ -138,7 +138,7 @@
 
         <!-- Row 6: Error Message -->
         <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-           Text="{Binding ErrorMessage}" 
+           Text="{Binding Form.ErrorMessage}" 
            Foreground="Red" 
            FontSize="12" 
            FontWeight="Bold"

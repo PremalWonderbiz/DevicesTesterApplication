@@ -3,18 +3,29 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using DeviceTesterCore.Interfaces;
 using DeviceTesterUI.Commands;
+using DeviceTesterUI.Helpers;
 using DeviceTesterUI.ViewModels;
 using DeviceTesterUI.Windows;
+using Google.Protobuf.WellKnownTypes;
 using Newtonsoft.Json;
+using NxtControl.Automation.Engineering.DeploySnapshot;
+using NxtControl.ComponentModel.LibraryElements;
+using SchneiderElectric.Automation.Sodb.Client;
+using SchneiderElectric.Automation.Sodb.Common;
+using SchneiderElectric.Automation.Sodb.Messages;
+
 
 namespace DeviceTesterCore.Models
 {
     public class DeviceViewModel : BaseViewModel
     {
+        
         #region DeviceListViewModel refactoring
         // new sub-VM instance (field initializer ensures availability before ctor runs)
         private readonly DeviceListViewModel _list = new DeviceListViewModel();
@@ -24,91 +35,13 @@ namespace DeviceTesterCore.Models
         #endregion
 
         #region DeviceFormViewModel refactoring
-        //private Device _editingDevice;
-        //public Device EditingDevice
-        //{
-        //    get => _editingDevice;
-        //    set
-        //    {
-        //        if (_editingDevice != null)
-        //        {
-        //            _editingDevice.ErrorsChanged -= EditingDevice_ErrorsChanged;
-        //            _editingDevice.PropertyChanged -= EditingDevice_PropertyChanged;
-        //        }
-
-        //        _editingDevice = value;
-
-        //        if (_editingDevice != null)
-        //        {
-        //            _editingDevice.ErrorsChanged += EditingDevice_ErrorsChanged;
-        //            _editingDevice.PropertyChanged += EditingDevice_PropertyChanged;
-
-        //            // Ensure ports are loaded for the current agent
-        //            LoadPorts(_editingDevice.Agent, string.IsNullOrEmpty(_editingDevice.DeviceId));
-        //        }
-
-        //        OnPropertyChanged(nameof(EditingDevice));
-        //        SaveCommand.RaiseCanExecuteChanged();
-        //        ClearCommand.RaiseCanExecuteChanged();
-        //    }
-        //}
-
-        //public ObservableCollection<string> AvailableAgents { get; } = new()
-        //{
-        //    "Redfish", "EcoRT", "SoftdPACManager"
-        //};
-
-        //public ObservableCollection<string> AvailablePorts { get; } = new();
-
-        //private string _errorMessage;
-        //public string ErrorMessage
-        //{
-        //    get => _errorMessage;
-        //    set { _errorMessage = value; OnPropertyChanged(nameof(ErrorMessage)); }
-        //}
-
         private readonly DeviceFormViewModel _form = new DeviceFormViewModel();
+
         public DeviceFormViewModel Form => _form;
 
-        // wrapper for EditingDevice that preserves the original side-effects (no method bodies changed)
-        public Device EditingDevice
-        {
-            get => Form.EditingDevice;
-            set
-            {
-                if (Form.EditingDevice != null)
-                {
-                    Form.EditingDevice.ErrorsChanged -= EditingDevice_ErrorsChanged;
-                    Form.EditingDevice.PropertyChanged -= EditingDevice_PropertyChanged;
-                }
-
-                Form.EditingDevice = value;
-
-                if (Form.EditingDevice != null)
-                {
-                    Form.EditingDevice.ErrorsChanged += EditingDevice_ErrorsChanged;
-                    Form.EditingDevice.PropertyChanged += EditingDevice_PropertyChanged;
-
-                    // Ensure ports are loaded for the current agent
-                    LoadPorts(Form.EditingDevice.Agent, string.IsNullOrEmpty(Form.EditingDevice.DeviceId));
-                }
-
-                OnPropertyChanged(nameof(EditingDevice));
-                SaveCommand.RaiseCanExecuteChanged();
-                ClearCommand.RaiseCanExecuteChanged();
-            }
-        }
-
-        public ObservableCollection<string> AvailableAgents { get => Form.AvailableAgents; }
-
-        public ObservableCollection<string> AvailablePorts { get => Form.AvailablePorts; }
-
-        public string ErrorMessage
-        {
-            get => Form.ErrorMessage;
-            set { Form.ErrorMessage = value; OnPropertyChanged(nameof(ErrorMessage)); }
-        }
-
+        // this is to store the old subscribed editing device
+        private Device _previousDevice; 
+        
         #endregion
 
         #region DeviceDetailsViewModel refactoring
@@ -141,7 +74,7 @@ namespace DeviceTesterCore.Models
         {
             if (e.PropertyName == nameof(Device.Agent))
             {
-                LoadPorts(EditingDevice.Agent, string.IsNullOrEmpty(EditingDevice.DeviceId));
+                LoadPorts(Form.EditingDevice.Agent, string.IsNullOrEmpty(Form.EditingDevice.DeviceId));
             }
         }
 
@@ -155,12 +88,12 @@ namespace DeviceTesterCore.Models
             StopDynamicUpdates();
 
             if (List.SelectedDevice != null)
-                EditingDevice = new Device(List.SelectedDevice); // copy constructor
+                Form.EditingDevice = new Device(List.SelectedDevice); // copy constructor
             else
-                EditingDevice = CreateDefaultDevice();
+                Form.EditingDevice = CreateDefaultDevice();
 
             DeviceJson = string.Empty;
-            ErrorMessage = string.Empty;
+            Form.ErrorMessage = string.Empty;
         }  
 
         // ================= Commands =================
@@ -183,6 +116,32 @@ namespace DeviceTesterCore.Models
                 {
                     OnSelectedDeviceChanged();
                     UpdateCommandStates();
+                }
+            };
+
+            Form.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(DeviceFormViewModel.EditingDevice))
+                {
+                    // unsubscribe from old device
+                    if (_previousDevice != null)
+                    {
+                        _previousDevice.ErrorsChanged -= EditingDevice_ErrorsChanged;
+                        _previousDevice.PropertyChanged -= EditingDevice_PropertyChanged;
+                    }
+
+                    // subscribe to new device
+                    _previousDevice = Form.EditingDevice;
+                    if (_previousDevice != null)
+                    {
+                        _previousDevice.ErrorsChanged += EditingDevice_ErrorsChanged;
+                        _previousDevice.PropertyChanged += EditingDevice_PropertyChanged;
+
+                        LoadPorts(_previousDevice.Agent, string.IsNullOrEmpty(_previousDevice.DeviceId));
+                    }
+
+                    SaveCommand.RaiseCanExecuteChanged();
+                    ClearCommand.RaiseCanExecuteChanged();
                 }
             };
 
@@ -220,7 +179,7 @@ namespace DeviceTesterCore.Models
             );
 
             _ = LoadDevicesAsync(true);
-            EditingDevice = CreateDefaultDevice();
+            Form.EditingDevice = CreateDefaultDevice();
         }
 
         public bool IsFetchingStatic => LoadingStates.ContainsKey("StaticData") && LoadingStates["StaticData"].IsLoading;
@@ -356,110 +315,116 @@ namespace DeviceTesterCore.Models
 
         private void LoadPorts(string agent, bool isNewDevice = true)
         {
-            AvailablePorts.Clear();
+            Form.AvailablePorts.Clear();
 
             switch (agent)
             {
                 case "Redfish":
-                    AvailablePorts.Add("9000");
-                    AvailablePorts.Add("Other");
+                    Form.AvailablePorts.Add("9000");
+                    Form.AvailablePorts.Add("Other");
                     break;
                 case "EcoRT":
-                    AvailablePorts.Add("51443");
-                    AvailablePorts.Add("51499");
-                    AvailablePorts.Add("Other");
+                    Form.AvailablePorts.Add("51443");
+                    Form.AvailablePorts.Add("51499");
+                    Form.AvailablePorts.Add("Other");
                     break;
                 case "SoftdPACManager":
-                    AvailablePorts.Add("443");
-                    AvailablePorts.Add("Other");
+                    Form.AvailablePorts.Add("443");
+                    Form.AvailablePorts.Add("Other");
                     break;
             }
 
-            if (EditingDevice != null)
+            if (Form.EditingDevice != null)
             {
                 if (!isNewDevice)
                 {
-                    if (!AvailablePorts.Contains(EditingDevice.Port))
+                    if (!Form.AvailablePorts.Contains(Form.EditingDevice.Port))
                     {
-                        AvailablePorts.Add(EditingDevice.Port);
+                        Form.AvailablePorts.Add(Form.EditingDevice.Port);
                         SortAvailablePorts();
                     }
                 }
                 else
                 {
-                    EditingDevice.Port = AvailablePorts.FirstOrDefault() ?? "0000";
+                    Form.EditingDevice.Port = Form.AvailablePorts.FirstOrDefault() ?? "0000";
                 }
             }
         }
 
         private void SortAvailablePorts()
         {
-            var sorted = AvailablePorts
+            var sorted = Form.AvailablePorts
                 .OrderBy(p => p == "Other" ? int.MaxValue : int.Parse(p))
                 .ToList();
 
-            AvailablePorts.Clear();
+            Form.AvailablePorts.Clear();
             foreach (var p in sorted)
-                AvailablePorts.Add(p);
+                Form.AvailablePorts.Add(p);
         }
 
         private async Task SaveDeviceAsync()
         {
-            if (EditingDevice == null) return;
+            if (Form.EditingDevice == null) return;
 
             // Duplicate IP + Port check
             bool duplicateIpPort = List.Devices.Any(d =>
-                d.IpAddress == EditingDevice.IpAddress &&
-                d.Port == EditingDevice.Port &&
-                d.DeviceId != EditingDevice.DeviceId);
+                d.IpAddress == Form.EditingDevice.IpAddress &&
+                d.Port == Form.EditingDevice.Port &&
+                d.DeviceId != Form.EditingDevice.DeviceId);
 
             if (duplicateIpPort)
             {
-                ErrorMessage = "A device with the same IP and Port already exists!";
+                Form.ErrorMessage = "A device with the same IP and Port already exists!";
                 return;
             }
 
-            ErrorMessage = string.Empty;
+            Form.ErrorMessage = string.Empty;
 
             // Generate IDs if empty
-            if (string.IsNullOrEmpty(EditingDevice.DeviceId))
-                EditingDevice.DeviceId = Guid.NewGuid().ToString();
-            if (string.IsNullOrEmpty(EditingDevice.SolutionId))
-                EditingDevice.SolutionId = Guid.NewGuid().ToString();
+            if (string.IsNullOrEmpty(Form.EditingDevice.DeviceId))
+                Form.EditingDevice.DeviceId = Guid.NewGuid().ToString();
+            if (string.IsNullOrEmpty(Form.EditingDevice.SolutionId))
+                Form.EditingDevice.SolutionId = Guid.NewGuid().ToString();
+
+            //set device name hard coded for now
+            Form.EditingDevice.DeviceName = $"Device {Form.EditingDevice.Agent}";
 
             // Add or update using copy constructor
-            var existing = List.Devices.FirstOrDefault(d => d.DeviceId == EditingDevice.DeviceId);
+            var existing = List.Devices.FirstOrDefault(d => d.DeviceId == Form.EditingDevice.DeviceId);
             if (existing != null)
             {
                 var index = List.Devices.IndexOf(existing);
-                List.Devices[index] = new Device(EditingDevice);
+                List.Devices[index] = new Device(Form.EditingDevice);
                 await _repo.SaveDevicesAsync(List.Devices);
                 MessageBox.Show("Device updated successfully!");
             }
             else
             {
-                EditingDevice.IsAuthenticated = false;
-                List.Devices.Insert(0, new Device(EditingDevice));
+                Form.EditingDevice.IsAuthenticated = false;
+                List.Devices.Insert(0, new Device(Form.EditingDevice));
                 await _repo.SaveDevicesAsync(List.Devices);
                 MessageBox.Show("Device saved successfully!");
             }
 
+     
+
             Clear(new object());
         }
 
+
         private bool CanSave(object obj)
         {
-            if (EditingDevice == null) return false;
-            return Validator.TryValidateObject(EditingDevice, new ValidationContext(EditingDevice), null, true);
+            if (Form.EditingDevice == null) return false;
+            return Validator.TryValidateObject(Form.EditingDevice, new ValidationContext(Form.EditingDevice), null, true);
         }
 
         private void Clear(object obj)
         {
-            ErrorMessage = string.Empty;
+            Form.ErrorMessage = string.Empty;
             List.SelectedDevice = null;
-            EditingDevice = CreateDefaultDevice();
-            EditingDevice.Agent = AvailableAgents.First();
-            EditingDevice.Port = AvailablePorts.FirstOrDefault();
+            Form.EditingDevice = CreateDefaultDevice();
+            Form.EditingDevice.Agent = Form.AvailableAgents.First();
+            Form.EditingDevice.Port = Form.AvailablePorts.FirstOrDefault();
         }
 
         private async Task AuthenticateDeviceAsync(Device device)
@@ -470,7 +435,7 @@ namespace DeviceTesterCore.Models
             await Task.Delay(500);
             bool result = new Random().Next(0, 2) == 1;
             device.IsAuthenticated = result;
-            EditingDevice.IsAuthenticated = result;
+            Form.EditingDevice.IsAuthenticated = result;
 
             if (!result)
             {
@@ -501,7 +466,7 @@ namespace DeviceTesterCore.Models
                 await _repo.SaveDevicesAsync(List.Devices);
 
                 if (List.SelectedDevice == device)
-                    EditingDevice = CreateDefaultDevice();
+                    Form.EditingDevice = CreateDefaultDevice();
 
                 MessageBox.Show("Device deleted successfully");
             }
@@ -608,4 +573,44 @@ namespace DeviceTesterCore.Models
         public Dictionary<string, LoadingState> LoadingStates { get; } = new();
 
     }
+
+    public class SodbClientSingleton
+    {
+        private static SodbClient instance;
+        private static readonly object lockObj = new object();
+        private static bool isInitialized = false;
+        private static string initializationError = null;
+
+        private SodbClientSingleton() { }
+
+        public static SodbClient Instance
+        {
+            get
+            {
+                lock (lockObj)
+                {
+                    if (instance == null && !isInitialized)
+                    {
+                        try
+                        {
+                            var logger = new ConsoleLogger();
+                            int mqqtPort = 22590;
+                            instance = new SodbClient(logger, new MqttClientCreator(IPAddress.Loopback.ToString(), mqqtPort, logger, false));
+                            instance.InitializeAsync().Wait();
+                            isInitialized = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            initializationError = ex.Message;
+                            throw;
+                        }
+                    }
+                    return instance;
+                }
+            }
+        }
+
+        public static string InitializationError => initializationError;
+    }
 }
+

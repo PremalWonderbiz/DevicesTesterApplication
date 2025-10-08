@@ -40,25 +40,25 @@ namespace DeviceTesterTests.ViewModelTests
             var device = new Device { DeviceId = "123", Agent = "Redfish" };
             _vm.List.SelectedDevice = device;
 
-            ClassicAssert.AreNotSame(device, _vm.EditingDevice);
-            ClassicAssert.AreEqual(device.DeviceId, _vm.EditingDevice.DeviceId);
-            ClassicAssert.AreEqual(device.Agent, _vm.EditingDevice.Agent);
+            ClassicAssert.AreNotSame(device, _vm.Form.EditingDevice);
+            ClassicAssert.AreEqual(device.DeviceId, _vm.Form.EditingDevice.DeviceId);
+            ClassicAssert.AreEqual(device.Agent, _vm.Form.EditingDevice.Agent);
         }
 
         [Test]
         public void SelectedDevice_SetToNull_ShouldCreateDefaultEditingDevice()
         {
             _vm.List.SelectedDevice = null;
-            ClassicAssert.IsNotNull(_vm.EditingDevice);
-            ClassicAssert.IsEmpty(_vm.EditingDevice.DeviceId);
+            ClassicAssert.IsNotNull(_vm.Form.EditingDevice);
+            ClassicAssert.IsEmpty(_vm.Form.EditingDevice.DeviceId);
         }
 
         [Test]
         public void EditingDevice_AgentChange_ShouldReloadPorts()
         {
-            _vm.EditingDevice.Agent = "EcoRT";
-            ClassicAssert.Contains("51443", _vm.AvailablePorts);
-            ClassicAssert.Contains("51499", _vm.AvailablePorts);
+            _vm.Form.EditingDevice.Agent = "EcoRT";
+            ClassicAssert.Contains("51443", _vm.Form.AvailablePorts);
+            ClassicAssert.Contains("51499", _vm.Form.AvailablePorts);
         }
 
         #endregion
@@ -79,7 +79,7 @@ namespace DeviceTesterTests.ViewModelTests
         [Test]
         public void SaveCommand_ShouldInsertNewDevice()
         {
-            _vm.EditingDevice = new Device { IpAddress = "127.0.0.1", Port = "9000", Agent = "Redfish" };
+            _vm.Form.EditingDevice = new Device { IpAddress = "127.0.0.1", Port = "9000", Agent = "Redfish" };
 
             // Execute SaveCommand which internally calls SaveDeviceAsync
             _vm.SaveCommand.Execute(null);
@@ -93,9 +93,9 @@ namespace DeviceTesterTests.ViewModelTests
         {
             var device = new Device { DeviceId = "1", IpAddress = "127.0.0.1", Port = "9000" };
             _vm.List.Devices.Add(new Device(device));
-            _vm.EditingDevice = new Device(device);
+            _vm.Form.EditingDevice = new Device(device);
 
-            _vm.EditingDevice.IpAddress = "192.168.0.1"; // change IP
+            _vm.Form.EditingDevice.IpAddress = "192.168.0.1"; // change IP
             _vm.SaveCommand.Execute(null);
 
             ClassicAssert.AreEqual(1, _vm.List.Devices.Count);
@@ -109,10 +109,10 @@ namespace DeviceTesterTests.ViewModelTests
             var device1 = new Device { DeviceId = "1", IpAddress = "127.0.0.1", Port = "9000" };
             _vm.List.Devices.Add(device1);
 
-            _vm.EditingDevice = new Device { DeviceId = "2", IpAddress = "127.0.0.1", Port = "9000" };
+            _vm.Form.EditingDevice = new Device { DeviceId = "2", IpAddress = "127.0.0.1", Port = "9000" };
             _vm.SaveCommand.Execute(null);
 
-            ClassicAssert.AreEqual("A device with the same IP and Port already exists!", _vm.ErrorMessage);
+            ClassicAssert.AreEqual("A device with the same IP and Port already exists!", _vm.Form.ErrorMessage);
         }
 
         [Test]
@@ -141,26 +141,26 @@ namespace DeviceTesterTests.ViewModelTests
         [Test]
         public void LoadPorts_ShouldPopulateCorrectPorts()
         {
-            _vm.EditingDevice.Agent = "SoftdPACManager";
-            ClassicAssert.Contains("443", _vm.AvailablePorts);
-            ClassicAssert.Contains("Other", _vm.AvailablePorts);
+            _vm.Form.EditingDevice.Agent = "SoftdPACManager";
+            ClassicAssert.Contains("443", _vm.Form.AvailablePorts);
+            ClassicAssert.Contains("Other", _vm.Form.AvailablePorts);
         }
 
         [Test]
         public void SortAvailablePorts_ShouldSortNumbersAndOtherLast()
         {
-            _vm.AvailablePorts.Clear();
-            _vm.AvailablePorts.Add("51499");
-            _vm.AvailablePorts.Add("Other");
-            _vm.AvailablePorts.Add("443");
+            _vm.Form.AvailablePorts.Clear();
+            _vm.Form.AvailablePorts.Add("51499");
+            _vm.Form.AvailablePorts.Add("Other");
+            _vm.Form.AvailablePorts.Add("443");
 
             // Use private method via reflection
             var method = typeof(DeviceViewModel).GetMethod("SortAvailablePorts", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             method.Invoke(_vm, null);
 
-            ClassicAssert.AreEqual("443", _vm.AvailablePorts[0]);
-            ClassicAssert.AreEqual("51499", _vm.AvailablePorts[1]);
-            ClassicAssert.AreEqual("Other", _vm.AvailablePorts[2]);
+            ClassicAssert.AreEqual("443", _vm.Form.AvailablePorts[0]);
+            ClassicAssert.AreEqual("51499", _vm.Form.AvailablePorts[1]);
+            ClassicAssert.AreEqual("Other", _vm.Form.AvailablePorts[2]);
         }
 
         #endregion
@@ -227,9 +227,12 @@ namespace DeviceTesterTests.ViewModelTests
         public void ChangingErrorMessage_ShouldRaisePropertyChanged()
         {
             bool fired = false;
-            _vm.PropertyChanged += (s, e) => { if (e.PropertyName == "ErrorMessage") fired = true; };
-
-            _vm.ErrorMessage = "Error";
+            _vm.Form.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(_vm.Form.ErrorMessage))
+                    fired = true;
+            };
+            _vm.Form.ErrorMessage = "Error";
 
             ClassicAssert.IsTrue(fired);
         }

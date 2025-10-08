@@ -18,14 +18,10 @@ namespace DeviceTesterUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly DeviceViewModel _deviceViewModel;
-
         public MainWindow(DeviceViewModel deviceViewModel)
         {
             InitializeComponent();
-            // Assuming x:Name="DeviceListView" and "DeviceFormView" are set in XAML
-            _deviceViewModel = deviceViewModel;
-            this.DataContext = _deviceViewModel;
+            this.DataContext = deviceViewModel;
         }
     }
 }
