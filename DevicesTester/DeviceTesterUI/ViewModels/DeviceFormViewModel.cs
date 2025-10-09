@@ -21,10 +21,10 @@ namespace DeviceTesterUI.ViewModels
             }
         }
 
-        public ObservableCollection<string> AvailableAgents { get; } = new()
-        {
+        public ObservableCollection<string> AvailableAgents { get; } =
+        [
             "Redfish", "EcoRT", "SoftdPACManager"
-        };
+        ];
 
         public ObservableCollection<string> AvailablePorts { get; } = new();
 

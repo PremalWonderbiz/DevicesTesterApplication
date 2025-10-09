@@ -104,6 +104,21 @@ namespace DeviceTesterCore.Models
             }
         }
 
+        private string _deviceName;
+        public string DeviceName
+        {
+            get => _deviceName;
+            set
+            {
+                if (_deviceName != value)
+                {
+                    _deviceName = value;
+                    OnPropertyChanged(nameof(DeviceName));
+                    ValidateProperty(nameof(DeviceName), value);
+                }
+            }
+        }
+
         private string _ipAddress;
         [Required(ErrorMessage = "IP Address is required")]
         [IPAddress(ErrorMessage = "Invalid IP address")]
@@ -212,6 +227,8 @@ namespace DeviceTesterCore.Models
 
             ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(propertyName));
         }
+
+
 
         // ==== PropertyChanged plumbing ====
         public event PropertyChangedEventHandler? PropertyChanged;

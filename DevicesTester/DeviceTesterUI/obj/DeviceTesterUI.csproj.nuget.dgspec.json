@@ -194,6 +194,14 @@
         "net8.0-windows7.0": {
           "targetAlias": "net8.0-windows",
           "dependencies": {
+            "Google.Protobuf": {
+              "target": "Package",
+              "version": "[3.32.1, )"
+            },
+            "Google.Protobuf.Tools": {
+              "target": "Package",
+              "version": "[3.32.1, )"
+            },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
               "version": "[9.0.9, )"
@@ -201,6 +209,18 @@
             "Newtonsoft.Json": {
               "target": "Package",
               "version": "[13.0.4, )"
+            },
+            "SchneiderElectric.Automation.Sodb.Client": {
+              "target": "Package",
+              "version": "[2.0.25030.6, )"
+            },
+            "SchneiderElectric.Automation.Sodb.Client.Protos": {
+              "target": "Package",
+              "version": "[2.0.25030.6, )"
+            },
+            "Studio-Service-SEUAP": {
+              "target": "Package",
+              "version": "[24.1.0.2433041, )"
             }
           },
           "imports": [

@@ -8,39 +8,38 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using DeviceTesterCore.Interfaces;
+using DeviceTesterCore.Models;
 using DeviceTesterUI.Commands;
 using DeviceTesterUI.Helpers;
 using DeviceTesterUI.ViewModels;
 using DeviceTesterUI.Windows;
 using Google.Protobuf.WellKnownTypes;
 using Newtonsoft.Json;
-using NxtControl.Automation.Engineering.DeploySnapshot;
-using NxtControl.ComponentModel.LibraryElements;
 using SchneiderElectric.Automation.Sodb.Client;
 using SchneiderElectric.Automation.Sodb.Common;
 using SchneiderElectric.Automation.Sodb.Messages;
 
 
-namespace DeviceTesterCore.Models
+namespace DeviceTesterUI.ViewModels
 {
     public class DeviceViewModel : BaseViewModel
     {
         
         #region DeviceListViewModel refactoring
         // new sub-VM instance (field initializer ensures availability before ctor runs)
-        private readonly DeviceListViewModel _list = new DeviceListViewModel();
+        private readonly DeviceListViewModel _list = new ();
         
         public DeviceListViewModel List => _list;
 
         #endregion
 
         #region DeviceFormViewModel refactoring
-        private readonly DeviceFormViewModel _form = new DeviceFormViewModel();
+        private readonly DeviceFormViewModel _form = new ();
 
         public DeviceFormViewModel Form => _form;
 
         // this is to store the old subscribed editing device
-        private Device _previousDevice; 
+        private DeviceTesterCore.Models.Device _previousDevice; 
         
         #endregion
 
@@ -52,7 +51,7 @@ namespace DeviceTesterCore.Models
         //    set { _deviceJson = value; OnPropertyChanged(nameof(DeviceJson)); }
         //}
 
-        private readonly DeviceDetailsViewModel _details = new DeviceDetailsViewModel();
+        private readonly DeviceDetailsViewModel _details = new ();
         public DeviceDetailsViewModel Details => _details;
 
         private string _staticResourceInput;
@@ -64,6 +63,8 @@ namespace DeviceTesterCore.Models
         private readonly IDeviceRepository _repo;
         private readonly IDeviceDataProvider _dataProvider;
 
+        //sodbClient for future implementation
+        private readonly ISodbClient? client;
 
         private void EditingDevice_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -100,9 +101,31 @@ namespace DeviceTesterCore.Models
         public ActionCommand GetDynamicDataCommand { get; }
         public ActionCommand ManageResourcesCommand { get; }
 
-        public DeviceViewModel(IDeviceRepository repo, IDeviceDataProvider dataProvider)
+        public DeviceViewModel(IDeviceRepository repo, IDeviceDataProvider dataProvider, ISodbClient? _client = null)
         {
-          
+            //sodb client future implementation
+            if (_client is not null)
+            {
+                client = _client;
+            }
+            else
+            {
+                try
+                {
+                    client = SodbClientSingleton.Instance;
+
+                    if (SodbClientSingleton.InitializationError != null)
+                    {
+                        MessageBox.Show($"Error initializing SodbClient: {SodbClientSingleton.InitializationError}", "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error initializing SodbClient: {ex.Message}", "Initialization Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+                
+
             _repo = repo;
             _dataProvider = dataProvider;
 
@@ -136,8 +159,8 @@ namespace DeviceTesterCore.Models
                         LoadPorts(_previousDevice.Agent, string.IsNullOrEmpty(_previousDevice.DeviceId));
                     }
 
-                    SaveCommand.RaiseCanExecuteChanged();
-                    ClearCommand.RaiseCanExecuteChanged();
+                    SaveCommand?.RaiseCanExecuteChanged();
+                    ClearCommand?.RaiseCanExecuteChanged();
                 }
             };
 
@@ -403,12 +426,120 @@ namespace DeviceTesterCore.Models
             }
 
 
-            
+            #region Future Implementation
+            //if (Form.EditingDevice.Agent == "EcoRT")
+            //{
+            //    var res = await EcoRt_Device_Add(Form.EditingDevice);
+            //}
+            //if (Form.EditingDevice.Agent == "Redfish")
+            //{
+            //    var res = await Redfish_Device_Add(Form.EditingDevice);
+            //}
+            #endregion
 
             Clear(new object());
         }
 
-        
+        //#region EcoRtAddFunctionality
+        //public async Task<bool> EcoRt_Device_Add(Device editingDevice)
+        //{
+        //    var deviceId = editingDevice.DeviceId;
+
+        //    var deviceDesc = new DeviceDescription { Id = deviceId, Name = "EcoRT_Device" };
+
+        //    var ecoRTConnectionDetails = new EcoRTConnectionDetails
+        //    {
+        //        AuthenticationPluginGuid = "D3BCDFDE-0476-4A15-B5F9-41E57E3D3DAA",
+        //        Endpoint = new Endpoint { Address = editingDevice.IpAddress, Port = int.Parse(editingDevice.Port) },
+        //        DeviceDesc = deviceDesc,
+        //        UseEncryption = editingDevice.UseSecureConnection,
+        //    };
+            
+        //    var deviceIdentifier = new DeviceIdentifier { DeviceId = deviceDesc.Id, OwnerId = "solutionId1" };
+
+        //    var connectionInfo = new ConnectionInfo
+        //    {
+        //        Protocol = EcoRTConstants.EcoRt.OriginalName(),
+        //        Credential = new Credential { Username = editingDevice.Username, Password = editingDevice.Password },
+        //        Details = Any.Pack(ecoRTConnectionDetails),
+        //    };
+
+        //    var authResult = await AddOrReplaceConnectionInfo(deviceIdentifier, connectionInfo).ConfigureAwait(false);
+
+        //    return authResult;
+        //}
+
+        //#endregion
+
+        //#region RedfishAddFunctionality
+        //public async Task<bool> Redfish_Device_Add(Device editingDevice)
+        //{
+        //    var redfishConnectionDetails = new RedfishConnectionDetails
+        //    {
+        //        Endpoint = new Endpoint { Address = editingDevice.IpAddress, Port = int.Parse(editingDevice.Port) }
+        //    };
+
+        //    var deviceIdentifier = new DeviceIdentifier { DeviceId = editingDevice.DeviceId, OwnerId = "solutionId1" };
+
+        //    var connectionInfo = new ConnectionInfo
+        //    {
+        //        Protocol = "Redfish",
+        //        Credential = new Credential { Username = editingDevice.Username, Password = editingDevice.Password },
+        //        Details = Any.Pack(redfishConnectionDetails),
+        //    };
+
+        //    var authResult = await AddOrReplaceConnectionInfo(deviceIdentifier, connectionInfo).ConfigureAwait(false);
+        //    //this.Dispatcher.Invoke(() =>
+        //    //{
+        //    //    this.txtLog.Text = authResult ? "ConnectionInfo added to store successfully" : "ConnectionInfo not added to store";
+        //    //});
+
+        //    return authResult;
+        //}
+
+        //#endregion
+
+        //#region HelperMethodForConnectionAddOrReplace
+        //public virtual async Task<bool> AddOrReplaceConnectionInfo(DeviceIdentifier id, ConnectionInfo connectionInfo)
+        //{
+        //    var connectionInfoAddRequest = new ConnectionInfoAddRequest
+        //    {
+        //        Id = id,
+        //        Info = connectionInfo,
+        //    };
+
+        //    var (result, _) = await client.ExecuteAsync<ConnectionInfoAddRequest, Empty>(SodbConnectionInfoFunction.V1AddOrReplace, connectionInfoAddRequest).ConfigureAwait(false);
+
+        //    return result;
+        //}
+
+        //#endregion
+
+        //#region AuthenticateFunctionality
+        //public async Task<bool> AuthenticateDeviceInSODB(Device device)
+        //{
+        //    var deviceId = device.DeviceId;
+
+        //    var deviceIdentifier = new DeviceIdentifier { DeviceId = deviceId, OwnerId = "solutionId1" };
+
+        //    var (IsSuccess, Data) = await client.ExecuteAsync<DeviceIdentifier, BoolValue>(SodbConnectionInfoFunction.V1ValidateExisting<EcoRTConstants>(EcoRTConstants.EcoRt), deviceIdentifier).ConfigureAwait(false);
+
+        //    if (Data == null || !IsSuccess)
+        //    {
+        //        return false;
+        //    }
+
+        //    //Dispatcher.Invoke(() =>
+        //    //{
+        //    //    var mosnitorWindow = new MonitorWindow($"Authentication State: {deviceId}");
+        //    //    monitorWindow.UpdateMonitorInfo(res.Data.Value ? "Valid credentials" : "Invalid credentials");
+        //    //    monitorWindow.Show();
+        //    //});
+
+        //    return IsSuccess;
+        //}
+
+        //#endregion
 
         private bool CanSave(object obj)
         {
@@ -447,7 +578,9 @@ namespace DeviceTesterCore.Models
 
             MessageBox.Show(result ? "Authentication succeeded" : "Authentication failed");
 
-           
+            #region Future Implementation
+            //AuthenticateDeviceInSODB(device);
+            #endregion
         }
 
         private async Task DeleteDeviceAsync(Device device)
@@ -472,7 +605,7 @@ namespace DeviceTesterCore.Models
             }
         }
 
-        public Device CreateDefaultDevice()
+        public static Device CreateDefaultDevice()
         {
             return new Device();
         }
@@ -522,7 +655,6 @@ namespace DeviceTesterCore.Models
                 UpdateCommandStates();
             }
         }
-
 
         private async Task AuthenticateAllDevices()
         {
@@ -577,7 +709,7 @@ namespace DeviceTesterCore.Models
     public class SodbClientSingleton
     {
         private static SodbClient instance;
-        private static readonly object lockObj = new object();
+        private static readonly object lockObj = new ();
         private static bool isInitialized = false;
         private static string initializationError = null;
 

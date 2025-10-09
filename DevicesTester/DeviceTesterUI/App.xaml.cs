@@ -6,6 +6,7 @@ using DeviceTesterCore.Interfaces;
 using DeviceTesterCore.Models;
 using DeviceTesterServices.Repositories;
 using DeviceTesterServices.Services;
+using DeviceTesterUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DeviceTesterUI
@@ -15,18 +16,18 @@ namespace DeviceTesterUI
     /// </summary>
     public partial class App : Application
     {
-        private ServiceProvider _serviceProvider;
+        private readonly ServiceProvider _serviceProvider;
 
         public App()
         {
-            ServiceCollection services = new ServiceCollection();
+            ServiceCollection services = new ();
 
             ConfigureServices(services);
 
             _serviceProvider = services.BuildServiceProvider();
         }
 
-        private void ConfigureServices(ServiceCollection services)
+        private static void ConfigureServices(ServiceCollection services)
         {
             // Register Repositories
             services.AddSingleton<IDeviceRepository, DeviceRepository>();
@@ -37,14 +38,14 @@ namespace DeviceTesterUI
             {
                 // Specify your dynamic files
                 string exeDir = AppDomain.CurrentDomain.BaseDirectory;
-                string[] dynamicFiles = new string[]
-                {
+                string[] dynamicFiles =
+                [
                     Path.Combine(exeDir, "DummyData", "DynamicData2.json"),
                     Path.Combine(exeDir, "DummyData", "DynamicData3.json"),
                     Path.Combine(exeDir, "DummyData", "DynamicData4.json"),
                     Path.Combine(exeDir, "DummyData", "DynamicData5.json"),
                     Path.Combine(exeDir, "DummyData", "DynamicData1.json")
-                };
+                ];
 
                 return new JsonDeviceDataProvider(dynamicFiles, intervalMs: 2000);
             });

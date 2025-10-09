@@ -198,7 +198,7 @@ namespace DeviceTesterTests.ServicesTests
 
             typeof(System.Timers.Timer)
                 .GetMethod("OnElapsed", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
-                .Invoke(timerField, new object[] { null });
+                .Invoke(timerField, new object?[] { null });
 
             // Assert callback was NOT invoked again
             ClassicAssert.AreEqual(previousCount, callCount);

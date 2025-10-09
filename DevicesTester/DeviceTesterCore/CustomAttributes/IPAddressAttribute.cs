@@ -17,7 +17,7 @@ namespace DeviceTesterCore.CustomAttributes
         private static readonly Regex IPv6Regex =
             new Regex(@"^([0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4}$");
 
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
             if (value == null) return ValidationResult.Success; // Let [Required] handle nulls
 

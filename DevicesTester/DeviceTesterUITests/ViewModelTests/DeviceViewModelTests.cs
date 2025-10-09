@@ -10,8 +10,15 @@ using NUnit.Framework;
 using DeviceTesterCore.Models;
 using System.Collections.ObjectModel;
 using Newtonsoft.Json.Linq;
+using Google.Protobuf.WellKnownTypes;
+using SchneiderElectric.Automation.Sodb.Messages;
+using SchneiderElectric.Automation.Sodb.Common;
+using Moq.Protected;
+using DeviceTesterUI.ViewModels;
+using SchneiderElectric.Automation.Sodb.Client;
+using System.Reflection;
 
-namespace DeviceTesterTests.ViewModelTests
+namespace DeviceTesterUITests.ViewModelTests
 {
     [TestFixture]
     public class DeviceViewModelTests
@@ -68,7 +75,7 @@ namespace DeviceTesterTests.ViewModelTests
         [Test]
         public async Task LoadDevicesAsync_ShouldPopulateDevices()
         {
-            var list = new List<Device> { new Device { DeviceId = "1" } };
+            var list = new List<Device> { new () { DeviceId = "1" } };
             _repoMock.Setup(r => r.LoadDevicesAsync()).ReturnsAsync(list);
 
             await _vm.LoadDevicesAsync();
@@ -93,9 +100,12 @@ namespace DeviceTesterTests.ViewModelTests
         {
             var device = new Device { DeviceId = "1", IpAddress = "127.0.0.1", Port = "9000" };
             _vm.List.Devices.Add(new Device(device));
-            _vm.Form.EditingDevice = new Device(device);
+            _vm.Form.EditingDevice = new Device(device)
+            {
+                IpAddress = "192.168.0.1"   // change IP
+            };
 
-            _vm.Form.EditingDevice.IpAddress = "192.168.0.1"; // change IP
+            //_vm.Form.EditingDevice.IpAddress = "192.168.0.1"; // change IP
             _vm.SaveCommand.Execute(null);
 
             ClassicAssert.AreEqual(1, _vm.List.Devices.Count);
@@ -156,7 +166,7 @@ namespace DeviceTesterTests.ViewModelTests
 
             // Use private method via reflection
             var method = typeof(DeviceViewModel).GetMethod("SortAvailablePorts", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            method.Invoke(_vm, null);
+            method?.Invoke(_vm, null);
 
             ClassicAssert.AreEqual("443", _vm.Form.AvailablePorts[0]);
             ClassicAssert.AreEqual("51499", _vm.Form.AvailablePorts[1]);
@@ -174,7 +184,7 @@ namespace DeviceTesterTests.ViewModelTests
             _vm.List.SelectedDevice = device;
 
             _dataProviderMock.Setup(d => d.GetStaticAsync(device)).ReturnsAsync("StaticData");
-          
+
             await _vm.GetStaticDataAsync();
 
             ClassicAssert.AreEqual("StaticData", _vm.Details.DeviceJson);
@@ -238,5 +248,212 @@ namespace DeviceTesterTests.ViewModelTests
         }
 
         #endregion
+
     }
+
+    //[TestFixture]
+    //public class SodbServiceMethodsTests
+    //{
+    //    private Mock<DeviceViewModel> _serviceMock;
+    //    private Mock<ISodbClient> _sodbClient;
+
+    //    [SetUp]
+    //    public void Setup()
+    //    {
+    //        // Use CallBase so we can test the real method but still mock dependencies
+    //        var repoMock = new Mock<IDeviceRepository>();
+    //        var dataProviderMock = new Mock<IDeviceDataProvider>();
+    //        _sodbClient = new Mock<ISodbClient>();
+
+    //        _serviceMock = new Mock<DeviceViewModel>(repoMock.Object, dataProviderMock.Object, _sodbClient.Object)
+    //        {
+    //            CallBase = true
+    //        };
+    //    }
+
+    //    [Test]
+    //    public async Task EcoRt_Device_ShouldReturnTrue_WhenAddOrReplaceConnectionInfoSucceeds()
+    //    {
+    //        // Arrange
+    //        var editingDevice = new Device
+    //        {
+    //            DeviceId = "dev123",
+    //            DeviceName = "EcoRT_Device_1",
+    //            IpAddress = "192.168.1.10",
+    //            Port = "502",
+    //            Username = "admin",
+    //            Password = "pass",
+    //            UseSecureConnection = true
+    //        };
+
+    //        _serviceMock.Setup(x => x.AddOrReplaceConnectionInfo(
+    //                        It.IsAny<DeviceIdentifier>(),
+    //                        It.IsAny<ConnectionInfo>()))
+    //                    .ReturnsAsync(true);
+
+    //        // Act
+    //        var result = await _serviceMock.Object.EcoRt_Device_Add(editingDevice);
+
+    //        // Assert
+    //        ClassicAssert.IsTrue(result);
+    //        _serviceMock.Verify(s => s.AddOrReplaceConnectionInfo(
+    //                            It.IsAny<DeviceIdentifier>(),
+    //                            It.IsAny<ConnectionInfo>()), Times.Once);
+    //    }
+
+    //    [Test]
+    //    public async Task EcoRt_Device_Add_ShouldReturnFalse_WhenAddOrReplaceConnectionInfoFails()
+    //    {
+    //        // Arrange
+    //        var editingDevice = new Device
+    //        {
+    //            DeviceId = "dev456",
+    //            DeviceName = "EcoRT_Device_2",
+    //            IpAddress = "10.0.0.2",
+    //            Port = "8080",
+    //            Username = "user",
+    //            Password = "pwd",
+    //            UseSecureConnection = false
+    //        };
+
+    //        _serviceMock
+    //            .Setup(s => s.AddOrReplaceConnectionInfo(
+    //                        It.IsAny<DeviceIdentifier>(),
+    //                        It.IsAny<ConnectionInfo>()))
+    //            .ReturnsAsync(false);
+
+    //        // Act
+    //        var result = await _serviceMock.Object.EcoRt_Device_Add(editingDevice);
+
+    //        // Assert
+    //        ClassicAssert.IsFalse(result);
+    //        _serviceMock.Verify(s => s.AddOrReplaceConnectionInfo(
+    //                             It.IsAny<DeviceIdentifier>(),
+    //                             It.IsAny<ConnectionInfo>()), Times.Once);
+    //    }
+
+    //    [Test]
+    //    public async Task Redfish_Device_Add_ShouldReturnTrue_WhenAddOrReplaceConnectionInfoSucceeds()
+    //    {
+    //        // Arrange
+    //        var editingDevice = new Device
+    //        {
+    //            DeviceId = "dev123",
+    //            DeviceName = "EcoRT_Device_1",
+    //            IpAddress = "192.168.1.10",
+    //            Port = "502",
+    //            Username = "admin",
+    //            Password = "pass",
+    //            UseSecureConnection = true
+    //        };
+
+    //        _serviceMock.Setup(x => x.AddOrReplaceConnectionInfo(
+    //                        It.IsAny<DeviceIdentifier>(),
+    //                        It.IsAny<ConnectionInfo>()))
+    //                    .ReturnsAsync(true);
+
+    //        // Act
+    //        var result = await _serviceMock.Object.Redfish_Device_Add(editingDevice);
+
+    //        // Assert
+    //        ClassicAssert.IsTrue(result);
+    //        _serviceMock.Verify(s => s.AddOrReplaceConnectionInfo(
+    //                            It.IsAny<DeviceIdentifier>(),
+    //                            It.IsAny<ConnectionInfo>()), Times.Once);
+    //    }
+
+    //    [Test]
+    //    public async Task Redfish_Device_Add_ShouldReturnFalse_WhenAddOrReplaceConnectionInfoFails()
+    //    {
+    //        // Arrange
+    //        var editingDevice = new Device
+    //        {
+    //            DeviceId = "dev456",
+    //            DeviceName = "EcoRT_Device_2",
+    //            IpAddress = "10.0.0.2",
+    //            Port = "8080",
+    //            Username = "user",
+    //            Password = "pwd",
+    //            UseSecureConnection = false
+    //        };
+
+    //        _serviceMock
+    //            .Setup(s => s.AddOrReplaceConnectionInfo(
+    //                        It.IsAny<DeviceIdentifier>(),
+    //                        It.IsAny<ConnectionInfo>()))
+    //            .ReturnsAsync(false);
+
+    //        // Act
+    //        var result = await _serviceMock.Object.Redfish_Device_Add(editingDevice);
+
+    //        // Assert
+    //        ClassicAssert.IsFalse(result);
+    //        _serviceMock.Verify(s => s.AddOrReplaceConnectionInfo(
+    //                             It.IsAny<DeviceIdentifier>(),
+    //                             It.IsAny<ConnectionInfo>()), Times.Once);
+    //    }
+
+    //    [Test]
+    //    public async Task Authenticate_Device_ShouldReturnTrue_WhenAuthenticationSucceeds()
+    //    {
+    //        _sodbClient
+    //            .Setup(c => c.ExecuteAsync<DeviceIdentifier, BoolValue>(It.IsAny<SodbFunction>(), It.IsAny<DeviceIdentifier>()))
+    //            .ReturnsAsync((true, new BoolValue()));
+
+    //        var device = new Device
+    //        {
+    //            DeviceId = "dev123",
+    //            DeviceName = "EcoRT_Device_1",
+    //            IpAddress = "192.168.1.10",
+    //            Port = "502",
+    //            Username = "admin",
+    //            Password = "pass",
+    //            UseSecureConnection = true
+    //        };
+
+    //        // Act
+    //        var result = await _serviceMock.Object.AuthenticateDeviceInSODB(device);
+
+    //        // Assert
+    //        ClassicAssert.IsTrue(result);
+
+    //        _sodbClient.Verify(s => s.ExecuteAsync<DeviceIdentifier, BoolValue>(
+    //                             It.IsAny<SodbFunction>(),
+    //                             It.IsAny<DeviceIdentifier>()), Times.Once);
+
+    //    }
+        
+    //    [Test]
+    //    public async Task AddOrReplaceConnectionInfo_ShouldReturnTrue_WhenExecuteAsyncSucceeds()
+    //    {
+    //        // Arrange
+    //        _sodbClient
+    //            .Setup(c => c.ExecuteAsync<ConnectionInfoAddRequest, Empty>(It.IsAny<SodbFunction>(), It.IsAny<ConnectionInfoAddRequest>()))
+    //            .ReturnsAsync((true, new Empty()));
+
+    //        var device = new Device
+    //        {
+    //            DeviceId = "dev123",
+    //            DeviceName = "EcoRT_Device_1",
+    //            IpAddress = "192.168.1.10",
+    //            Port = "502",
+    //            Username = "admin",
+    //            Password = "pass",
+    //            UseSecureConnection = true
+    //        };
+
+    //        // Act
+    //        var result = await _serviceMock.Object.AddOrReplaceConnectionInfo(It.IsAny<DeviceIdentifier>(),
+    //                             It.IsAny<ConnectionInfo>());
+
+    //        // Assert
+    //        ClassicAssert.IsTrue(result);
+
+    //        _sodbClient.Verify(s => s.ExecuteAsync<ConnectionInfoAddRequest, Empty>(
+    //                             It.IsAny<SodbFunction>(),
+    //                             It.IsAny<ConnectionInfoAddRequest>()), Times.Once);
+
+    //    }
+    //}
+
 }

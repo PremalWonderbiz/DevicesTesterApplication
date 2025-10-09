@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using DeviceTesterCore.Models;
+using DeviceTesterUI.ViewModels;
 using DeviceTesterUI.Windows;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

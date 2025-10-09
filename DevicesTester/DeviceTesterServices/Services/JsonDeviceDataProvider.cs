@@ -62,9 +62,7 @@ namespace DeviceTesterServices.Services
 
         public void StartDynamicUpdates(Device device, Action<string> onDataReceived)
         {
-            if (onDataReceived == null)
-                throw new ArgumentNullException(nameof(onDataReceived));
-
+            ArgumentNullException.ThrowIfNull(onDataReceived);
             _onDataReceived = onDataReceived;
             _fileIndex = 0;
 

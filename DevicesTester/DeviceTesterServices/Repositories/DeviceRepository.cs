@@ -16,6 +16,7 @@ namespace DeviceTesterServices.Repositories
     public class DeviceRepository : IDeviceRepository
     {
         private readonly string _filePath;
+        private readonly JsonSerializerOptions jsonSerializerOptions = new () { WriteIndented = true };
 
         /// <summary>
         /// Initializes the repository with a default file path inside the executable directory.
@@ -56,7 +57,7 @@ namespace DeviceTesterServices.Repositories
         /// <param name="devices">Collection of devices to persist.</param>
         public async Task SaveDevicesAsync(IEnumerable<Device> devices)
         {
-            var json = JsonSerializer.Serialize(devices, new JsonSerializerOptions { WriteIndented = true });
+            var json = JsonSerializer.Serialize(devices, jsonSerializerOptions);
             await File.WriteAllTextAsync(_filePath, json).ConfigureAwait(false);
         }
     }

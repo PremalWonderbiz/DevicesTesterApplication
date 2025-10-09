@@ -9,9 +9,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.32.1" />
+    <PackageReference Include="Google.Protobuf.Tools" Version="3.32.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="SchneiderElectric.Automation.Sodb.Client" Version="2.0.25030.6" />
+    <PackageReference Include="SchneiderElectric.Automation.Sodb.Client.Protos" Version="2.0.25030.6" />
+    <PackageReference Include="Studio-Service-SEUAP" Version="24.1.0.2433041" />
   </ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="$(NuGetPackageRoot)schneiderelectric.automation.sodb.client.protos\2.0.25030.1\content\Protos\*.proto" GrpcServices="Client" />
+	</ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DeviceTesterCore\DeviceTesterCore.csproj" />
